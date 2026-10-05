@@ -10,6 +10,8 @@
 # Environment variables:
 #   CHN_REF=<branch>   Branch to download when run through curl (default: main)
 #   CHN_DEFAULTS=1     Never prompt, use the default answer for every question
+# Variables set here are read by the modules that install.sh sources.
+# shellcheck disable=SC2034
 
 set -euo pipefail
 
