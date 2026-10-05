@@ -1,0 +1,10 @@
+# Noctalia Greeter admin config. Installed to /var/lib/noctalia-greeter/greeter.toml.
+# The layout is read from the system by the installer.
+
+[cursor]
+theme = "Adwaita"
+size = 24
+
+[keyboard]
+layout = "@KB_LAYOUT@"
+variant = "@KB_VARIANT@"
