@@ -27,6 +27,7 @@ REQUIRED_PKGS=(
   satty
   wl-clipboard
   gnome-keyring
+  dconf
   kitty
   xdg-utils
 )
