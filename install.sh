@@ -16,7 +16,7 @@ set -euo pipefail
 REPO_OWNER="fabcard"
 REPO_NAME="cachyos-hyprland-noctalia"
 REPO_REF="${CHN_REF:-main}"
-TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${REPO_REF}.tar.gz"
+TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/${REPO_REF}.tar.gz"
 
 # Answers collected by ask_options, used by the modules.
 INSTALL_BLUETOOTH=0
