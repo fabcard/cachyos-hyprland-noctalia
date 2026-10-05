@@ -1,1 +1,3 @@
+# Environment only for Hyprland sessions started by UWSM.
 
+export HYPRCURSOR_SIZE=24
