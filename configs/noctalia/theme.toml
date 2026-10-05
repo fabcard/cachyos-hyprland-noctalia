@@ -1,0 +1,6 @@
+# Noctalia theme. Dark mode is on.
+# Choices made in the Noctalia settings window are saved by Noctalia in
+# ~/.local/state/noctalia/settings.toml and win over this file.
+
+[theme]
+mode = "dark"
