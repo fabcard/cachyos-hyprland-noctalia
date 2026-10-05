@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Shared helpers. Sourced by install.sh, never executed directly.
 
+# Variables set here are read by the other modules.
+# shellcheck disable=SC2034
+
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
