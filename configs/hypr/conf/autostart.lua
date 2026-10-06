@@ -5,4 +5,9 @@
 hl.on("hyprland.start", function()
   hl.exec_cmd("noctalia")
   hl.exec_cmd("hyprctl setcursor Adwaita 24")
+
+  -- First login only: create the user folders and add them to the Nautilus
+  -- sidebar. GNOME and KDE do this on their own, Hyprland does not.
+  -- Once the bookmarks file exists this does nothing.
+  hl.exec_cmd("test -f ~/.config/gtk-3.0/bookmarks || xdg-user-dirs-gtk-update")
 end)
