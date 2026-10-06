@@ -73,22 +73,45 @@ Choices you make later in the Noctalia settings window are saved by Noctalia in 
 
 ## Keybinds
 
+The layout follows the CachyOS Hyprland + Noctalia setup. `SUPER` is the main key.
+
+Apps:
 - `SUPER + Return`: terminal
 - `SUPER + E`: files
 - `SUPER + W`: browser
 - `SUPER + T`: text editor
 - `SUPER + C`: calculator
+
+Noctalia:
 - `SUPER + Space`: launcher
+- `SUPER + .`: emoji picker
+- `SUPER + V`: clipboard history
 - `SUPER + X`: control center
+- `SUPER + A`: notifications
 - `SUPER + Z`: Noctalia settings
+- `SUPER + SHIFT + W`: wallpaper picker
 - `SUPER + L`: lock screen
-- `SUPER + Q`: close window
-- `SUPER + SHIFT + Q`: end the session
-- `SUPER + F`: fullscreen
-- `SUPER + V`: toggle floating
-- `SUPER + 1..0`: switch workspace, add `SHIFT` to move the window
-- `Print`: screenshot of a region
-- Volume keys control the volume through Noctalia
+- `SUPER + ALT + C`: session menu (lock, log out, reboot, shut down)
+- `SUPER + Tab`: window switcher
+- `Print`: screenshot of a region, `SUPER + Print`: full screen
+
+Windows:
+- `SUPER + Q`: close
+- `SUPER + F`: fullscreen, `SUPER + D`: maximize
+- `SUPER + ALT + Space`: toggle floating
+- `SUPER + J`: toggle split
+- `SUPER + arrows`: move focus, add `SHIFT` to move the window
+- `SUPER + Escape`: click a window to kill it
+- `SUPER + mouse drag`: move (left button) or resize (right button)
+- `SUPER + minus` and `SUPER + plus`: zoom
+
+Workspaces:
+- `SUPER + 1..0`: switch workspace, add `SHIFT` to move the window there
+- `SUPER + CONTROL + left/right`: previous or next workspace, add `SHIFT` to move the window
+- `SUPER + CONTROL + down`: next empty workspace
+- `SUPER + S`: scratchpad, `SUPER + SHIFT + S`: move the window to it
+
+Volume, media and brightness keys work through Noctalia.
 
 ## After the install
 
