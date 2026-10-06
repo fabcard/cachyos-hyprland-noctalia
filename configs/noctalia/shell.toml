@@ -3,6 +3,10 @@
 # Noctalia's own polkit agent shows the password prompt for apps that need
 # administrator access (Shelly, the greeter sync, ...). Only one polkit agent
 # may run in a session, so do not start another one.
+#
+# Apps started from the Noctalia launcher run as systemd services, like the
+# apps started with "uwsm app" in the Hyprland keybinds.
 
 [shell]
 polkit_agent = true
+launch_apps_as_systemd_services = true

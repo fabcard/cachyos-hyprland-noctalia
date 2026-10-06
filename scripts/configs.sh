@@ -5,7 +5,8 @@
 # in. Existing files are backed up first. Files that did not change are left
 # alone, so running the installer twice is safe.
 #
-# Placeholders: @KB_LAYOUT@ @KB_VARIANT@ @BROWSER_DESKTOP@ @HOME@
+# Placeholders: @KB_LAYOUT@ @KB_VARIANT@ @BROWSER_DESKTOP@ @HOME@ @CURSOR_THEME@
+# @CURSOR_PATH@ @MONITOR1@ @MONITOR2@ @MONITOR3@
 
 CONFIGS_DIR="${CONFIGS_DIR:-${SCRIPT_DIR:-.}/configs}"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -19,9 +20,18 @@ DESKTOP_DIRS=(
   /var/lib/flatpak/exports/share/applications
 )
 
+DRM_DIR="${DRM_DIR:-/sys/class/drm}"
+
 KB_LAYOUT="us"
 KB_VARIANT=""
 BROWSER_DESKTOP="brave-origin.desktop"
+MONITOR1=""
+MONITOR2=""
+MONITOR3=""
+CURSOR_THEME="${CURSOR_THEME:-Adwaita}"
+CURSOR_PATH="${CURSOR_PATH:-/usr/share/icons}"
+GREETER_SYNC_OK=0
+BTOP_TEMPLATE=0
 
 # ---------------------------------------------------------------------------
 # Detection
@@ -78,6 +88,34 @@ detect_browser() {
   warn "No Brave desktop file found. Browser entries will be skipped in mimeapps.list."
 }
 
+# Read the connected monitors (for example DP-1 or HDMI-A-1) from the kernel.
+# Up to three. When nothing is found the names stay empty, which means "any monitor".
+detect_monitors() {
+  local status_file name count=0
+
+  for status_file in "$DRM_DIR"/card*-*/status; do
+    [[ -r "$status_file" ]] || continue
+    [[ "$(<"$status_file")" == "connected" ]] || continue
+
+    name="${status_file%/status}"
+    name="${name##*/}"
+    name="${name#card*-}"
+    count=$(( count + 1 ))
+
+    case "$count" in
+      1) MONITOR1="$name" ;;
+      2) MONITOR2="$name" ;;
+      3) MONITOR3="$name" ;;
+    esac
+  done
+
+  if (( count == 0 )); then
+    warn "No connected monitor found. Edit ~/.config/hypr/conf/variables.lua later if you need to."
+  else
+    info "Monitors: ${MONITOR1:-none}${MONITOR2:+, $MONITOR2}${MONITOR3:+, $MONITOR3}"
+  fi
+}
+
 # ---------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------
@@ -92,6 +130,11 @@ render_stdout() {
     -e "s|@KB_VARIANT@|$(sed_escape "$KB_VARIANT")|g" \
     -e "s|@BROWSER_DESKTOP@|$(sed_escape "$BROWSER_DESKTOP")|g" \
     -e "s|@HOME@|$(sed_escape "$HOME")|g" \
+    -e "s|@CURSOR_THEME@|$(sed_escape "$CURSOR_THEME")|g" \
+    -e "s|@CURSOR_PATH@|$(sed_escape "$CURSOR_PATH")|g" \
+    -e "s|@MONITOR1@|$(sed_escape "$MONITOR1")|g" \
+    -e "s|@MONITOR2@|$(sed_escape "$MONITOR2")|g" \
+    -e "s|@MONITOR3@|$(sed_escape "$MONITOR3")|g" \
     "$src" | sed -E '/^variant = ""$/d'
 }
 
@@ -117,15 +160,20 @@ render_file() {
   rm -f "$tmp"
 }
 
-# Render every file of configs/<name> into $CONFIG_HOME/<name>.
-install_tree() {
-  local name="$1" src_dir="$CONFIGS_DIR/$1" file
+# Render every file of a source folder into a destination folder.
+install_dir() {
+  local src_dir="$1" dest_dir="$2" file
 
   [[ -d "$src_dir" ]] || die "Missing config folder: $src_dir"
 
   while IFS= read -r -d '' file; do
-    render_file "$file" "$CONFIG_HOME/$name/${file#"$src_dir"/}"
+    render_file "$file" "$dest_dir/${file#"$src_dir"/}"
   done < <(find "$src_dir" -type f -print0 | sort -z)
+}
+
+# Render every file of configs/<name> into $CONFIG_HOME/<name>.
+install_tree() {
+  install_dir "$CONFIGS_DIR/$1" "$CONFIG_HOME/$1"
 }
 
 # ---------------------------------------------------------------------------
@@ -161,10 +209,14 @@ install_mimeapps() {
   rm -f "$tmp"
 }
 
-# Turn on the GTK and Qt theme templates of Noctalia. The template IDs come
-# from "noctalia theme --list-templates", so no ID is guessed.
+# Turn on the Noctalia theme templates for GTK, Qt, kitty and btop apps.
+# The IDs below are the ones the CachyOS setup uses. They are checked against
+# "noctalia theme --list-templates". When that list cannot be read, they are
+# used as they are.
+TEMPLATE_CANDIDATES=(gtk3 gtk4 qt kitty btop)
+
 write_noctalia_templates() {
-  local line tok ids=() joined="" tmp id
+  local line tok listed=() ids=() candidate found joined="" tmp id
 
   if ! command -v noctalia >/dev/null 2>&1; then
     warn "noctalia not found, skipping theme templates."
@@ -174,27 +226,45 @@ write_noctalia_templates() {
   while IFS= read -r line; do
     tok="${line#"${line%%[[:alnum:]]*}"}"
     tok="${tok%%[[:space:]]*}"
-    tok="${tok,,}"
-    case "$tok" in
-      gtk*|qt*) ids+=("$tok") ;;
-    esac
+    listed+=("${tok,,}")
   done < <(noctalia theme --list-templates 2>/dev/null || true)
 
+  if (( ${#listed[@]} == 0 )); then
+    ids=("${TEMPLATE_CANDIDATES[@]}")
+  else
+    for candidate in "${TEMPLATE_CANDIDATES[@]}"; do
+      for found in "${listed[@]}"; do
+        if [[ "$found" == "$candidate" ]]; then
+          ids+=("$candidate")
+          break
+        fi
+      done
+    done
+  fi
+
   if (( ${#ids[@]} == 0 )); then
-    warn "Could not read template IDs from noctalia. In Noctalia open Settings > Templates"
-    warn "and turn on GTK 3, GTK 4 and Qt by hand."
+    warn "None of the expected theme templates were listed by noctalia. In Noctalia open"
+    warn "Settings > Templates and turn on GTK 3, GTK 4, Qt and kitty by hand."
     return 0
   fi
 
-  while IFS= read -r id; do
+  for id in "${ids[@]}"; do
     joined+="${joined:+, }\"$id\""
-  done < <(printf '%s\n' "${ids[@]}" | sort -u)
+    [[ "$id" == "btop" ]] && BTOP_TEMPLATE=1
+  done
 
   info "Noctalia templates enabled: $joined"
   tmp="$(mktemp)"
-  printf '# Theme templates for GTK and Qt apps (generated by the installer).\n\n[theme.templates]\nenable_builtin_templates = true\nbuiltin_ids = [%s]\n' "$joined" >"$tmp"
+  printf '# Theme templates for GTK, Qt, kitty and btop apps (generated by the installer).\n\n[theme.templates]\nenable_builtin_templates = true\nbuiltin_ids = [%s]\n' "$joined" >"$tmp"
   place_file "$tmp" "$CONFIG_HOME/noctalia/templates.toml"
   rm -f "$tmp"
+}
+
+# btop only needs its config when the Noctalia btop template is on.
+install_btop_config() {
+  if [[ "$BTOP_TEMPLATE" == "1" ]] && command -v btop >/dev/null 2>&1; then
+    install_tree btop
+  fi
 }
 
 # greeter.toml lives in a folder owned by the greetd user.
@@ -214,6 +284,9 @@ install_greeter_config() {
 
   tmp="$(mktemp)"
   render_stdout "$src" >"$tmp"
+  if [[ "$GREETER_SYNC_OK" == "1" ]]; then
+    printf '\n[appearance]\nscheme = "Synced"\n' >>"$tmp"
+  fi
 
   if [[ -f "$dest" ]] && cmp -s "$tmp" "$dest"; then
     ok "greeter.toml already up to date."
@@ -244,7 +317,7 @@ apply_gsettings() {
     "color-scheme prefer-dark"
     "gtk-theme adw-gtk3-dark"
     "icon-theme Adwaita"
-    "cursor-theme Adwaita"
+    "cursor-theme $CURSOR_THEME"
     "cursor-size 24"
   )
 
@@ -291,6 +364,7 @@ auto_sync = true
 TOML
   place_file "$tmp" "$CONFIG_HOME/noctalia/greeter-sync.toml"
   rm -f "$tmp"
+  GREETER_SYNC_OK=1
   ok "Login screen sync enabled."
 }
 
@@ -309,6 +383,7 @@ install_configs() {
 
   detect_keyboard
   detect_browser
+  detect_monitors
 
   mkdir -p "$WALLPAPER_DIR"
   warn_old_hypr_conf
@@ -320,12 +395,16 @@ install_configs() {
   install_tree gtk-3.0
   install_tree gtk-4.0
   install_tree qt6ct
+  install_dir "$CONFIGS_DIR/icons/default" "$HOME/.icons/default"
   install_mimeapps
   write_noctalia_templates
-  install_greeter_config
+  install_btop_config
+
+  # The greeter sync comes first: greeter.toml depends on whether it works.
   if [[ "${INSTALL_GREETER_SYNC:-0}" == "1" ]]; then
     setup_greeter_sync
   fi
+  install_greeter_config
   apply_gsettings
 
   if command -v noctalia >/dev/null 2>&1; then

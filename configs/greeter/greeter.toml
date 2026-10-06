@@ -1,10 +1,14 @@
 # Noctalia Greeter admin config. Installed to /var/lib/noctalia-greeter/greeter.toml.
-# The layout is read from the system by the installer.
+# The cursor and the keyboard layout are filled in by the installer.
 
 [cursor]
-theme = "Adwaita"
+theme = "@CURSOR_THEME@"
 size = 24
+path = "@CURSOR_PATH@"
 
 [keyboard]
 layout = "@KB_LAYOUT@"
 variant = "@KB_VARIANT@"
+
+[session]
+default = "Hyprland (uwsm-managed)"

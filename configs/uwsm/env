@@ -1,5 +1,7 @@
 # Environment for every UWSM session. Shell syntax, read at login.
 
-export XCURSOR_THEME=Adwaita
-export XCURSOR_SIZE=24
+export QT_QPA_PLATFORM="wayland;xcb"
 export QT_QPA_PLATFORMTHEME=qt6ct
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+export XCURSOR_THEME=@CURSOR_THEME@
+export XCURSOR_SIZE=24

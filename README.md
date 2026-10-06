@@ -2,6 +2,8 @@
 
 Installer for a lean Hyprland desktop with the Noctalia Shell and the Noctalia Greeter, made for a fresh CachyOS install without a desktop.
 
+The look, the keybinds, the animations and the window rules follow the CachyOS Hyprland + Noctalia setup. This project adds an installer for a minimal system, GNOME apps, a wallpaper pack, wallpaper sync to the login screen without a password, and the Bibata cursor.
+
 > **Status:** early release. Built for CachyOS. Other Arch-based systems may work, but the installer warns you first.
 
 ## Install
@@ -36,7 +38,7 @@ bash install.sh
    - Install network share (SMB) support for Nautilus? (default: no)
    - Download the wallpaper pack to `~/Pictures/Wallpapers`? (default: no)
    - Sync wallpaper and colors to the login screen without a password prompt? (default: no)
-3. Runs a full system update (`pacman -Syu`) and installs the packages.
+3. Runs a full system update (`pacman -Syu`), installs the packages and downloads the cursor theme.
 4. Writes the greetd configuration and enables the services.
 5. Installs the configuration files, backing up anything it replaces.
 
@@ -44,14 +46,20 @@ bash install.sh
 
 - Session: `hyprland`, `uwsm`, `xdg-desktop-portal-hyprland`, `xdg-desktop-portal-gtk`, `noctalia`, `greetd`, `noctalia-greeter`
 - System: `pipewire`, `wireplumber`, `pipewire-pulse`, `networkmanager`, `polkit`, `gnome-keyring`, `dconf`, `xdg-utils`
-- Clipboard and screenshots: `wl-clipboard`, `grim`, `slurp`, `satty`
+- Clipboard, screenshots and tools: `wl-clipboard`, `grim`, `slurp`, `satty`, `hyprpicker`, `btop`
 - Terminal and theme: `kitty`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `qt6ct`, `qt6-wayland`
 - Apps: `nautilus`, `loupe`, `papers`, `gnome-text-editor`, `gnome-calculator`, `decibels`, `showtime`, `brave-origin-bin`
-- Disks and files: `gvfs`, `gvfs-mtp`, `udisks2`, `exfatprogs`, `ntfs-3g`
+- Disks and files: `gvfs`, `gvfs-mtp`, `udisks2`, `exfatprogs`, `ntfs-3g`, `xdg-user-dirs-gtk`
 - Fonts: `ttf-jetbrains-mono-nerd`, `noto-fonts`, `noto-fonts-emoji`
 - Optional: `bluez`, `bluez-utils`, `gvfs-smb`
 
-Everything comes from the repositories. No AUR helper is installed. If a package is missing from the repositories, the installer only tries the AUR when `shelly`, `paru` or `yay` is already on the system, and it asks first.
+Everything comes from the repositories, except the cursor theme (see below). No AUR helper is installed. If a package is missing from the repositories, the installer only tries the AUR when `shelly`, `paru` or `yay` is already on the system, and it asks first.
+
+### Cursor
+
+Bibata Modern Ice is downloaded from the [upstream releases](https://github.com/ful1e5/Bibata_Cursor/releases) (version pinned in `scripts/packages.sh`) and installed to `/usr/local/share/icons`. That folder is readable by every user, including the greeter, which runs as a different user. If the download fails, the installer uses the Adwaita cursor and keeps going.
+
+The cursor is applied to Hyprland, GTK, X11 apps, Qt and the login screen.
 
 ### Services
 
@@ -59,22 +67,27 @@ Everything comes from the repositories. No AUR helper is installed. If a package
 
 ### Configuration
 
-Files are copied to `~/.config` with the keyboard layout (read from the system, default `us`) and the browser desktop file filled in.
+Files are copied to `~/.config`. The installer fills in the keyboard layout (read from the system, default `us`), the browser desktop file, the cursor theme and the names of the connected monitors (read from `/sys/class/drm`).
 
-- `~/.config/hypr/hyprland.lua` loads one file per topic from `~/.config/hypr/conf/`: monitors, input, look, animations, workspaces, rules, keybinds and autostart.
-- `~/.config/noctalia/`: dark theme, wallpaper folder, and the GTK and Qt theme templates.
-- `~/.config/uwsm/env` and `env-hyprland`: cursor and Qt theme variables.
-- `~/.config/kitty/kitty.conf`, `~/.config/gtk-3.0/settings.ini`, `~/.config/gtk-4.0/settings.ini`, `~/.config/qt6ct/qt6ct.conf`
+- `~/.config/hypr/hyprland.lua` loads one file per topic from `~/.config/hypr/conf/`: `colors`, `variables`, `monitors`, `input`, `look`, `animations`, `misc`, `workspaces`, `rules`, `keybinds` and `autostart`. App names and monitor names live in `variables.lua`.
+- `~/.config/hypr/xdph.conf`: screen sharing remembers its permission.
+- `~/.config/noctalia/`: dark mode, wallpaper folder, the polkit agent, and the theme templates for GTK, Qt, kitty and btop.
+- `~/.config/uwsm/env` and `env-hyprland`: cursor, Qt and Electron variables.
+- `~/.config/kitty/kitty.conf`, `~/.config/gtk-3.0/`, `~/.config/gtk-4.0/`, `~/.config/qt6ct/qt6ct.conf`, `~/.icons/default/index.theme`
 - `~/.config/mimeapps.list`: Brave, Nautilus, Loupe, Showtime, Decibels, Papers and GNOME Text Editor. Entries for apps that are not installed are left out.
 - `/etc/greetd/config.toml` and `/var/lib/noctalia-greeter/greeter.toml` for the login screen.
 
-Dark mode is on, with `adw-gtk3-dark`, the Adwaita icons and the Adwaita cursor.
+Dark mode is on, with `adw-gtk3-dark` and the Adwaita icons.
 
 Choices you make later in the Noctalia settings window are saved by Noctalia in `~/.local/state/noctalia/settings.toml`. They take priority over the files in `~/.config/noctalia/`, and the installer never touches that file.
 
+## Gaming
+
+Games are sent to a workspace named `gaming` on the primary monitor. The rules match Steam games (`steam_app.*`), `gamescope`, and windows that report themselves as games. They also start those games fullscreen. Adaptive sync (`vrr`) and direct scanout are on for fullscreen games only.
+
 ## Keybinds
 
-The layout follows the CachyOS Hyprland + Noctalia setup. `SUPER` is the main key.
+These are the CachyOS keybinds. `SUPER` is the main key. Run `hyprctl binds` to see them all.
 
 Apps:
 - `SUPER + Return`: terminal
@@ -82,6 +95,8 @@ Apps:
 - `SUPER + W`: browser
 - `SUPER + T`: text editor
 - `SUPER + C`: calculator
+- `CONTROL + SHIFT + Escape`: btop
+- `SUPER + P`: color picker
 
 Noctalia:
 - `SUPER + Space`: launcher
@@ -101,25 +116,30 @@ Windows:
 - `SUPER + F`: fullscreen, `SUPER + D`: maximize
 - `SUPER + ALT + Space`: toggle floating
 - `SUPER + J`: toggle split
-- `SUPER + arrows`: move focus, add `SHIFT` to move the window
 - `SUPER + Escape`: click a window to kill it
+- `SUPER + arrows`: move focus, add `SHIFT` to move the window
+- `ALT + Tab`: cycle windows
 - `SUPER + mouse drag`: move (left button) or resize (right button)
 - `SUPER + minus` and `SUPER + plus`: zoom
 
-Workspaces:
-- `SUPER + 1..0`: switch workspace, add `SHIFT` to move the window there
-- `SUPER + CONTROL + left/right`: previous or next workspace, add `SHIFT` to move the window
-- `SUPER + CONTROL + down`: next empty workspace
+Workspaces and monitors:
+- `SUPER + ALT + 1..0`: go to a workspace by number
+- `SUPER + CONTROL + 1..0`: go to a workspace of the current monitor (with 3 workspaces per monitor)
+- `SUPER + CONTROL + left/right`: previous or next workspace, `down`: next empty one
+- `SUPER + SHIFT + CONTROL + 1..0`: move the window to a workspace of the current monitor, use `ALT` instead of `CONTROL` to stay where you are
+- `SUPER + 1..3`: focus monitor 1 to 3, add `SHIFT` to move the window there
 - `SUPER + S`: scratchpad, `SUPER + SHIFT + S`: move the window to it
 
 Volume, media and brightness keys work through Noctalia.
 
+The number of workspaces per monitor is `NUM_WPM` in `~/.config/hypr/conf/variables.lua`.
+
 ## After the install
 
 1. Reboot.
-2. At the login screen, pick the **Hyprland (uwsm-managed)** session. The greeter remembers your choice.
+2. At the login screen, the Hyprland (uwsm-managed) session is already selected.
 3. Pick a wallpaper in the Noctalia settings.
-4. If the Qt theme looks off, open `qt6ct` once, select the `noctalia` color scheme and apply. In the Noctalia settings under Templates, check that GTK 3, GTK 4 and Qt are on.
+4. If the Qt theme looks off, open `qt6ct` once, select the `noctalia` color scheme and apply. In the Noctalia settings under Templates, check that GTK 3, GTK 4, Qt, kitty and btop are on.
 
 ## Backups and rerunning
 
@@ -129,7 +149,7 @@ To restore a file, copy it back from the backup folder.
 
 ## Login screen sync
 
-If you answer yes to the sync question, the installer runs `sudo noctalia-greeter passwordless-sync enable "$USER"` and turns on `auto_sync` in `~/.config/noctalia/greeter-sync.toml`. Changing the wallpaper or the theme then updates the login screen without a password prompt.
+If you answer yes to the sync question, the installer runs `sudo noctalia-greeter passwordless-sync enable "$USER"` and turns on `auto_sync` in `~/.config/noctalia/greeter-sync.toml`. Changing the wallpaper or the theme then updates the login screen without a password prompt. The login screen also uses the synced colors.
 
 The rule written by the greeter only allows its constrained appearance sync, only for your user, and only from an active local session. It needs Noctalia Greeter 1.5.0 or newer. If the command fails, the installer leaves auto-sync off.
 
@@ -157,14 +177,16 @@ curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/m
 - **Check the Noctalia config:** `noctalia config validate`
 - **Hyprland too old:** run `sudo pacman -Syu` and try again. The installer needs 0.55 or newer.
 - **`noctalia` not found:** the `cachyos-extra-v3` repository is missing from `/etc/pacman.conf`, or the CPU does not support x86-64-v3.
+- **Wrong monitor name or no workspaces:** run `hyprctl monitors` and edit `MONITOR1` in `~/.config/hypr/conf/variables.lua`.
 
 ## Credits
 
 - [Hyprland](https://hypr.land/) and its [wiki](https://wiki.hypr.land/)
 - [Noctalia](https://docs.noctalia.dev/)
-- The CachyOS Hyprland setup, used as a reference for the config layout and keybinds
+- The [CachyOS Hyprland + Noctalia setup](https://github.com/CachyOS/cachyos-hypr-noctalia): keybinds, animations, window rules, colors, look and miscellaneous settings, adapted here.
+- [Bibata Cursor](https://github.com/ful1e5/Bibata_Cursor) by ful1e5, downloaded at install time.
 - Wallpapers (optional download): [minimalistic-wallpaper-collection](https://github.com/DenverCoder1/minimalistic-wallpaper-collection). The images belong to their original artists.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+The installer and the files written for this project are under the MIT license. See [LICENSE](LICENSE). The files adapted from the CachyOS setup keep the license of the original project, so check its repository before reusing them.

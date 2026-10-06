@@ -1,5 +1,5 @@
--- Monitors. Default: every monitor at its preferred mode, placed automatically.
--- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+-- Monitors. See https://wiki.hypr.land/Configuring/Basics/Monitors/
+-- The output names come from variables.lua.
 --
 -- Examples:
 --   mode = "highrr"           highest refresh rate
@@ -7,8 +7,8 @@
 --   scale = 1                 fixed scale instead of "auto"
 
 hl.monitor({
-  output = "",
-  mode = "preferred",
+  output   = MONITOR1,
+  mode     = "preferred",
   position = "auto",
-  scale = "auto",
+  scale    = "auto",
 })

@@ -55,7 +55,20 @@ OPTIONAL_PKGS=(
   ttf-jetbrains-mono-nerd
   noto-fonts
   noto-fonts-emoji
+  xdg-user-dirs-gtk
+  hyprpicker
+  btop
 )
+
+# Cursor theme: Bibata Modern Ice, from the upstream release (not in the repositories).
+# It goes to /usr/local/share/icons so every user can read it, including the
+# greeter, which runs as a different user. If anything fails, Adwaita is used.
+BIBATA_VERSION="v2.0.7"
+BIBATA_URL="https://github.com/ful1e5/Bibata_Cursor/releases/download/${BIBATA_VERSION}/Bibata-Modern-Ice.tar.xz"
+BIBATA_SHA256="a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef" # SHA-256 of the v2.0.7 archive
+CURSOR_SYSTEM_DIR="${CURSOR_SYSTEM_DIR:-/usr/local/share/icons}"
+CURSOR_THEME="Adwaita"
+CURSOR_PATH="/usr/share/icons"
 
 BLUETOOTH_PKGS=(bluez bluez-utils)
 SMB_PKGS=(gvfs-smb)
@@ -160,6 +173,56 @@ check_hyprland_version() {
   ok "Hyprland $ver supports Lua configuration."
 }
 
+use_bibata_cursor() {
+  CURSOR_THEME="Bibata-Modern-Ice"
+  CURSOR_PATH="$CURSOR_SYSTEM_DIR"
+  ok "Cursor theme: $CURSOR_THEME"
+}
+
+install_cursor_theme() {
+  local tmp archive
+
+  step "Installing the cursor theme"
+
+  if [[ -f "$CURSOR_SYSTEM_DIR/Bibata-Modern-Ice/cursors/left_ptr" ]]; then
+    use_bibata_cursor
+    return 0
+  fi
+
+  tmp="$(mktemp -d)"
+  archive="$tmp/Bibata-Modern-Ice.tar.xz"
+
+  if ! curl -fsSL "$BIBATA_URL" -o "$archive"; then
+    warn "Could not download Bibata ($BIBATA_URL). Using the Adwaita cursor."
+    rm -rf "$tmp"
+    return 0
+  fi
+
+  if [[ -n "$BIBATA_SHA256" ]]; then
+    if ! echo "$BIBATA_SHA256  $archive" | sha256sum -c --status; then
+      warn "The Bibata archive does not match the pinned checksum. Using the Adwaita cursor."
+      rm -rf "$tmp"
+      return 0
+    fi
+  else
+    warn "No checksum is pinned for the Bibata archive, so it is only protected by HTTPS."
+  fi
+
+  if ! tar -xf "$archive" -C "$tmp" || [[ ! -f "$tmp/Bibata-Modern-Ice/cursors/left_ptr" ]]; then
+    warn "The Bibata archive has an unexpected layout. Using the Adwaita cursor."
+    rm -rf "$tmp"
+    return 0
+  fi
+
+  sudo install -d -m 0755 "$CURSOR_SYSTEM_DIR"
+  sudo rm -rf "$CURSOR_SYSTEM_DIR/Bibata-Modern-Ice"
+  sudo cp -a --no-preserve=ownership "$tmp/Bibata-Modern-Ice" "$CURSOR_SYSTEM_DIR/"
+  sudo chmod -R u=rwX,go=rX "$CURSOR_SYSTEM_DIR/Bibata-Modern-Ice"
+  rm -rf "$tmp"
+
+  use_bibata_cursor
+}
+
 install_packages() {
   local pkg
 
@@ -199,5 +262,6 @@ install_packages() {
   fi
 
   check_hyprland_version
+  install_cursor_theme
   ok "Packages done."
 }
