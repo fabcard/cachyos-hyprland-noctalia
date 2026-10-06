@@ -1,0 +1,8 @@
+# Shell settings.
+#
+# Noctalia's own polkit agent shows the password prompt for apps that need
+# administrator access (Shelly, the greeter sync, ...). Only one polkit agent
+# may run in a session, so do not start another one.
+
+[shell]
+polkit_agent = true
