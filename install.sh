@@ -105,7 +105,7 @@ finish() {
     info "Previous config files were backed up to: $BACKUP_DIR"
   fi
   info "Reboot to start the Noctalia Greeter, then pick the Hyprland (UWSM) session."
-  if ask_yes_no "Reboot now?" n; then
+  if ask_yes_no "Reboot now?" y; then
     sudo systemctl reboot
   fi
 }
