@@ -6,6 +6,8 @@
 # repository are only tried from the AUR when an AUR helper (shelly, paru or
 # yay) already exists, and only after asking. No helper is ever installed.
 
+# Variables set here are read by the other modules.
+# shellcheck disable=SC2034
 MIN_HYPRLAND_VERSION="0.55.0"
 
 # A missing package from this list stops the installer.
