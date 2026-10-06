@@ -260,6 +260,40 @@ apply_gsettings() {
   fi
 }
 
+# Let Noctalia sync the wallpaper and colors to the login screen without a
+# password prompt. The rule written by noctalia-greeter only covers its
+# constrained appearance sync action, only for this user, and only from an
+# active local session.
+# Undo with: sudo noctalia-greeter passwordless-sync disable "$USER"
+setup_greeter_sync() {
+  local user tmp
+  user="$(id -un)"
+
+  if ! command -v noctalia-greeter >/dev/null 2>&1; then
+    warn "noctalia-greeter not found, skipping greeter sync."
+    return 0
+  fi
+
+  if ! sudo noctalia-greeter passwordless-sync enable "$user"; then
+    warn "Could not enable passwordless greeter sync. The greeter may be older than 1.5.0."
+    warn "Auto-sync stays off, because it would ask for a password on every change."
+    return 0
+  fi
+
+  tmp="$(mktemp)"
+  cat >"$tmp" <<'TOML'
+# Sync the Noctalia wallpaper and colors to the login screen automatically.
+# Needs the passwordless rule created with:
+#   sudo noctalia-greeter passwordless-sync enable "$USER"
+
+[shell.greeter_sync]
+auto_sync = true
+TOML
+  place_file "$tmp" "$CONFIG_HOME/noctalia/greeter-sync.toml"
+  rm -f "$tmp"
+  ok "Login screen sync enabled."
+}
+
 warn_old_hypr_conf() {
   if [[ -f "$CONFIG_HOME/hypr/hyprland.conf" ]]; then
     warn "Found an old $CONFIG_HOME/hypr/hyprland.conf. Hyprland 0.55 uses hyprland.lua; consider removing the .conf."
@@ -289,6 +323,9 @@ install_configs() {
   install_mimeapps
   write_noctalia_templates
   install_greeter_config
+  if [[ "${INSTALL_GREETER_SYNC:-0}" == "1" ]]; then
+    setup_greeter_sync
+  fi
   apply_gsettings
 
   if command -v noctalia >/dev/null 2>&1; then
