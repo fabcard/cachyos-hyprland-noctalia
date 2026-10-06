@@ -24,6 +24,7 @@ TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/${REPO_REF}.t
 INSTALL_BLUETOOTH=0
 INSTALL_SMB=0
 INSTALL_WALLPAPERS=0
+INSTALL_GREETER_SYNC=0
 
 SCRIPT_DIR=""
 
@@ -89,6 +90,11 @@ ask_options() {
   fi
   if ask_yes_no "Download the wallpaper pack to ~/Pictures/Wallpapers?" n; then
     INSTALL_WALLPAPERS=1
+  fi
+
+  info "Syncing the login screen runs a fixed helper as root. A polkit rule can allow it for your user without a password."
+  if ask_yes_no "Sync wallpaper and colors to the login screen without a password prompt?" n; then
+    INSTALL_GREETER_SYNC=1
   fi
 }
 
