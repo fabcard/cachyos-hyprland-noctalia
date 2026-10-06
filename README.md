@@ -31,10 +31,11 @@ bash install.sh
 ## What it does
 
 1. Checks the system: not root, CachyOS or Arch-based, internet, sudo, and no other desktop or display manager (it asks before continuing if it finds one).
-2. Asks three questions, then runs without interruptions:
+2. Asks four questions, then runs without interruptions:
    - Install Bluetooth packages and enable the service? (default: no)
    - Install network share (SMB) support for Nautilus? (default: no)
    - Download the wallpaper pack to `~/Pictures/Wallpapers`? (default: no)
+   - Sync wallpaper and colors to the login screen without a password prompt? (default: no)
 3. Runs a full system update (`pacman -Syu`) and installs the packages.
 4. Writes the greetd configuration and enables the services.
 5. Installs the configuration files, backing up anything it replaces.
@@ -125,6 +126,19 @@ Volume, media and brightness keys work through Noctalia.
 Before replacing a file, the installer copies the old one to `~/.config-backup-YYYYMMDD-HHMMSS/`. Running the installer again is safe: packages already installed are skipped, files that did not change are left alone, and wallpapers you already have are kept.
 
 To restore a file, copy it back from the backup folder.
+
+## Login screen sync
+
+If you answer yes to the sync question, the installer runs `sudo noctalia-greeter passwordless-sync enable "$USER"` and turns on `auto_sync` in `~/.config/noctalia/greeter-sync.toml`. Changing the wallpaper or the theme then updates the login screen without a password prompt.
+
+The rule written by the greeter only allows its constrained appearance sync, only for your user, and only from an active local session. It needs Noctalia Greeter 1.5.0 or newer. If the command fails, the installer leaves auto-sync off.
+
+To undo it:
+
+```sh
+sudo noctalia-greeter passwordless-sync disable "$USER"
+rm ~/.config/noctalia/greeter-sync.toml
+```
 
 ## Options
 
