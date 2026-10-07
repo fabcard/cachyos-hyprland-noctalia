@@ -47,7 +47,7 @@ bash install.sh
 - Session: `hyprland`, `uwsm`, `xdg-desktop-portal-hyprland`, `xdg-desktop-portal-gtk`, `noctalia`, `greetd`, `noctalia-greeter`
 - System: `pipewire`, `wireplumber`, `pipewire-pulse`, `networkmanager`, `polkit`, `gnome-keyring`, `dconf`, `xdg-utils`
 - Clipboard, screenshots and tools: `wl-clipboard`, `grim`, `slurp`, `satty`, `hyprpicker`, `btop`
-- Terminal and theme: `kitty`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `qt6ct`, `qt6-wayland`
+- Terminal and theme: `kitty`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `breeze-icons`, `qt6ct`, `qt6-wayland`
 - Apps: `nautilus`, `loupe`, `papers`, `gnome-text-editor`, `gnome-calculator`, `decibels`, `showtime`, `brave-origin-bin`
 - Disks and files: `gvfs`, `gvfs-mtp`, `udisks2`, `exfatprogs`, `ntfs-3g`, `xdg-user-dirs-gtk`
 - Fonts: `ttf-jetbrains-mono-nerd`, `noto-fonts`, `noto-fonts-emoji`
@@ -57,9 +57,11 @@ Everything comes from the repositories, except the cursor theme (see below). No 
 
 ### Cursor
 
-Bibata Modern Ice is downloaded from the [upstream releases](https://github.com/ful1e5/Bibata_Cursor/releases) (version pinned in `scripts/packages.sh`) and installed to `/usr/local/share/icons`. That folder is readable by every user, including the greeter, which runs as a different user. If the download fails, the installer uses the Adwaita cursor and keeps going.
+Bibata Modern Ice is downloaded from the [upstream releases](https://github.com/ful1e5/Bibata_Cursor/releases) (version and SHA-256 pinned in `scripts/packages.sh`) and installed to `/usr/share/icons`. Every toolkit searches that folder, and every user can read it, including the greeter, which runs as a different user. If the download fails, the installer uses the Adwaita cursor and keeps going.
 
 The cursor is applied to Hyprland, GTK, X11 apps, Qt and the login screen.
+
+The folder is not owned by any package. If a package ever ships the same folder, remove it first: `sudo rm -rf /usr/share/icons/Bibata-Modern-Ice`.
 
 ### Services
 
@@ -71,13 +73,20 @@ Files are copied to `~/.config`. The installer fills in the keyboard layout (rea
 
 - `~/.config/hypr/hyprland.lua` loads one file per topic from `~/.config/hypr/conf/`: `colors`, `variables`, `monitors`, `input`, `look`, `animations`, `misc`, `workspaces`, `rules`, `keybinds` and `autostart`. App names and monitor names live in `variables.lua`.
 - `~/.config/hypr/xdph.conf`: screen sharing remembers its permission.
-- `~/.config/noctalia/`: dark mode, wallpaper folder, the polkit agent, and the theme templates for GTK, Qt, kitty and btop.
+- `~/.config/noctalia/`: dark mode, wallpaper folder, the polkit agent, and the theme templates (see below).
+- `~/.config/kdeglobals`: selects the Noctalia color scheme for KDE-framework apps. Created only if it does not exist, because Noctalia may edit it later.
 - `~/.config/uwsm/env` and `env-hyprland`: cursor, Qt and Electron variables.
 - `~/.config/kitty/kitty.conf`, `~/.config/gtk-3.0/`, `~/.config/gtk-4.0/`, `~/.config/qt6ct/qt6ct.conf`, `~/.icons/default/index.theme`
 - `~/.config/mimeapps.list`: Brave, Nautilus, Loupe, Showtime, Decibels, Papers and GNOME Text Editor. Entries for apps that are not installed are left out.
 - `/etc/greetd/config.toml` and `/var/lib/noctalia-greeter/greeter.toml` for the login screen.
 
-Dark mode is on, with `adw-gtk3-dark` and the Adwaita icons.
+Dark mode is on, with `adw-gtk3-dark` and the Adwaita icons for GTK apps, and the Breeze Dark icons for Qt and KDE-framework apps (`breeze-icons`).
+
+### Theme templates
+
+Noctalia colors these apps, and the installer turns the templates on: GTK 3 and GTK 4 (GNOME apps), Qt (through `qt6ct`), KColorScheme (apps built with KDE frameworks, such as EasyEffects), kitty and btop. Other templates (other terminals, editors, compositors) are off. Turn them on in Noctalia Settings > Templates if you install those apps.
+
+Qt apps need two things to open dark. `qt6ct` gives the palette to plain Qt apps. The KColorScheme template and `~/.config/kdeglobals` give the colors to apps built with KDE frameworks, which ignore `qt6ct`.
 
 Choices you make later in the Noctalia settings window are saved by Noctalia in `~/.local/state/noctalia/settings.toml`. They take priority over the files in `~/.config/noctalia/`, and the installer never touches that file.
 
@@ -139,7 +148,7 @@ The number of workspaces per monitor is `NUM_WPM` in `~/.config/hypr/conf/variab
 1. Reboot.
 2. At the login screen, the Hyprland (uwsm-managed) session is already selected.
 3. Pick a wallpaper in the Noctalia settings.
-4. If the Qt theme looks off, open `qt6ct` once, select the `noctalia` color scheme and apply. In the Noctalia settings under Templates, check that GTK 3, GTK 4, Qt, kitty and btop are on.
+4. If the Qt theme looks off, open `qt6ct` once, select the `noctalia` color scheme and apply. In the Noctalia settings under Templates, check that GTK 3, GTK 4, Qt, KColorScheme, kitty and btop are on.
 
 ## Backups and rerunning
 

@@ -39,6 +39,7 @@ OPTIONAL_PKGS=(
   nwg-look
   adw-gtk-theme
   adwaita-icon-theme
+  breeze-icons
   qt6ct
   qt6-wayland
   nautilus
@@ -63,12 +64,15 @@ OPTIONAL_PKGS=(
 )
 
 # Cursor theme: Bibata Modern Ice, from the upstream release (not in the repositories).
-# It goes to /usr/local/share/icons so every user can read it, including the
-# greeter, which runs as a different user. If anything fails, Adwaita is used.
+# It goes to /usr/share/icons. That folder is searched by every toolkit (Xcursor,
+# GTK, Qt, Hyprland) and readable by every user, including the greeter, which
+# runs as a different user. /usr/local/share/icons is NOT searched by Xcursor.
+# If anything fails, Adwaita is used.
 BIBATA_VERSION="v2.0.7"
 BIBATA_URL="https://github.com/ful1e5/Bibata_Cursor/releases/download/${BIBATA_VERSION}/Bibata-Modern-Ice.tar.xz"
 BIBATA_SHA256="a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef" # SHA-256 of the v2.0.7 archive
-CURSOR_SYSTEM_DIR="${CURSOR_SYSTEM_DIR:-/usr/local/share/icons}"
+CURSOR_SYSTEM_DIR="${CURSOR_SYSTEM_DIR:-/usr/share/icons}"
+OLD_CURSOR_DIR="${OLD_CURSOR_DIR:-/usr/local/share/icons}" # used by an earlier version of this installer
 CURSOR_THEME="Adwaita"
 CURSOR_PATH="/usr/share/icons"
 
@@ -185,6 +189,11 @@ install_cursor_theme() {
   local tmp archive
 
   step "Installing the cursor theme"
+
+  # Remove the copy an earlier version of this installer put in /usr/local/share/icons.
+  if [[ -d "$OLD_CURSOR_DIR/Bibata-Modern-Ice" && "$OLD_CURSOR_DIR" != "$CURSOR_SYSTEM_DIR" ]]; then
+    sudo rm -rf "$OLD_CURSOR_DIR/Bibata-Modern-Ice"
+  fi
 
   if [[ -f "$CURSOR_SYSTEM_DIR/Bibata-Modern-Ice/cursors/left_ptr" ]]; then
     use_bibata_cursor
