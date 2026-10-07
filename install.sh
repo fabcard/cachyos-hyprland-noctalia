@@ -88,12 +88,12 @@ ask_options() {
   if ask_yes_no "Install network share (SMB) support for Nautilus?" n; then
     INSTALL_SMB=1
   fi
-  if ask_yes_no "Download the wallpaper pack to ~/Pictures/Wallpapers?" n; then
+  if ask_yes_no "Download the wallpaper pack to ~/Pictures/Wallpapers?" y; then
     INSTALL_WALLPAPERS=1
   fi
 
   info "Syncing the login screen runs a fixed helper as root. A polkit rule can allow it for your user without a password."
-  if ask_yes_no "Sync wallpaper and colors to the login screen without a password prompt?" n; then
+  if ask_yes_no "Sync wallpaper and colors to the login screen without a password prompt?" y; then
     INSTALL_GREETER_SYNC=1
   fi
 }
