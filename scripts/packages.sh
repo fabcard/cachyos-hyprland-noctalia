@@ -60,17 +60,24 @@ OPTIONAL_PKGS=(
   noto-fonts-emoji
   xdg-user-dirs-gtk
   hyprpicker
+  fastfetch
   btop
 )
 
-# Cursor theme: Bibata Modern Ice, from the upstream release (not in the repositories).
-# It goes to /usr/share/icons. That folder is searched by every toolkit (Xcursor,
+# Cursor themes, from the upstream release (not in the repositories):
+#   Bibata Modern Ice     white, used in dark mode (also the login screen)
+#   Bibata Modern Classic black, used in light mode
+# Both go to /usr/share/icons. That folder is searched by every toolkit (Xcursor,
 # GTK, Qt, Hyprland) and readable by every user, including the greeter, which
 # runs as a different user. /usr/local/share/icons is NOT searched by Xcursor.
-# If anything fails, Adwaita is used.
+# If the Ice download fails, Adwaita is used. If the Classic download fails,
+# only the dark cursor is available and the light mode keeps it.
 BIBATA_VERSION="v2.0.7"
-BIBATA_URL="https://github.com/ful1e5/Bibata_Cursor/releases/download/${BIBATA_VERSION}/Bibata-Modern-Ice.tar.xz"
-BIBATA_SHA256="a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef" # SHA-256 of the v2.0.7 archive
+BIBATA_BASE_URL="https://github.com/ful1e5/Bibata_Cursor/releases/download/${BIBATA_VERSION}"
+BIBATA_ICE="Bibata-Modern-Ice"
+BIBATA_CLASSIC="Bibata-Modern-Classic"
+BIBATA_ICE_SHA256="a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef" # SHA-256 of the v2.0.7 archive
+BIBATA_CLASSIC_SHA256="7d3495864e5bbef02f5e77de760b2905903b63c71495a78ef6306d19a3b556d8" # SHA-256 of the v2.0.7 archive
 CURSOR_SYSTEM_DIR="${CURSOR_SYSTEM_DIR:-/usr/share/icons}"
 OLD_CURSOR_DIR="${OLD_CURSOR_DIR:-/usr/local/share/icons}" # used by an earlier version of this installer
 CURSOR_THEME="Adwaita"
@@ -180,58 +187,75 @@ check_hyprland_version() {
 }
 
 use_bibata_cursor() {
-  CURSOR_THEME="Bibata-Modern-Ice"
+  CURSOR_THEME="$BIBATA_ICE"
   CURSOR_PATH="$CURSOR_SYSTEM_DIR"
   ok "Cursor theme: $CURSOR_THEME"
 }
 
-install_cursor_theme() {
-  local tmp archive
+# Download one Bibata variant and install it to $CURSOR_SYSTEM_DIR.
+# Usage: install_bibata_variant <name> <sha256>
+# Returns 0 when the variant is installed, 1 when it is not (a warning is printed).
+install_bibata_variant() {
+  local name="$1" sha="$2" tmp archive url
 
-  step "Installing the cursor theme"
-
-  # Remove the copy an earlier version of this installer put in /usr/local/share/icons.
-  if [[ -d "$OLD_CURSOR_DIR/Bibata-Modern-Ice" && "$OLD_CURSOR_DIR" != "$CURSOR_SYSTEM_DIR" ]]; then
-    sudo rm -rf "$OLD_CURSOR_DIR/Bibata-Modern-Ice"
-  fi
-
-  if [[ -f "$CURSOR_SYSTEM_DIR/Bibata-Modern-Ice/cursors/left_ptr" ]]; then
-    use_bibata_cursor
+  if [[ -f "$CURSOR_SYSTEM_DIR/$name/cursors/left_ptr" ]]; then
     return 0
   fi
 
+  url="$BIBATA_BASE_URL/$name.tar.xz"
   tmp="$(mktemp -d)"
-  archive="$tmp/Bibata-Modern-Ice.tar.xz"
+  archive="$tmp/$name.tar.xz"
 
-  if ! curl -fsSL "$BIBATA_URL" -o "$archive"; then
-    warn "Could not download Bibata ($BIBATA_URL). Using the Adwaita cursor."
+  if ! curl -fsSL "$url" -o "$archive"; then
+    warn "Could not download $name ($url)."
     rm -rf "$tmp"
-    return 0
+    return 1
   fi
 
-  if [[ -n "$BIBATA_SHA256" ]]; then
-    if ! echo "$BIBATA_SHA256  $archive" | sha256sum -c --status; then
-      warn "The Bibata archive does not match the pinned checksum. Using the Adwaita cursor."
+  if [[ -n "$sha" ]]; then
+    if ! echo "$sha  $archive" | sha256sum -c --status; then
+      warn "The $name archive does not match the pinned checksum."
       rm -rf "$tmp"
-      return 0
+      return 1
     fi
   else
-    warn "No checksum is pinned for the Bibata archive, so it is only protected by HTTPS."
+    warn "No checksum is pinned for the $name archive, so it is only protected by HTTPS."
   fi
 
-  if ! tar -xf "$archive" -C "$tmp" || [[ ! -f "$tmp/Bibata-Modern-Ice/cursors/left_ptr" ]]; then
-    warn "The Bibata archive has an unexpected layout. Using the Adwaita cursor."
+  if ! tar -xf "$archive" -C "$tmp" || [[ ! -f "$tmp/$name/cursors/left_ptr" ]]; then
+    warn "The $name archive has an unexpected layout."
     rm -rf "$tmp"
-    return 0
+    return 1
   fi
 
   sudo install -d -m 0755 "$CURSOR_SYSTEM_DIR"
-  sudo rm -rf "$CURSOR_SYSTEM_DIR/Bibata-Modern-Ice"
-  sudo cp -a --no-preserve=ownership "$tmp/Bibata-Modern-Ice" "$CURSOR_SYSTEM_DIR/"
-  sudo chmod -R u=rwX,go=rX "$CURSOR_SYSTEM_DIR/Bibata-Modern-Ice"
+  sudo rm -rf "${CURSOR_SYSTEM_DIR:?}/$name"
+  sudo cp -a --no-preserve=ownership "$tmp/$name" "$CURSOR_SYSTEM_DIR/"
+  sudo chmod -R u=rwX,go=rX "$CURSOR_SYSTEM_DIR/$name"
   rm -rf "$tmp"
+  return 0
+}
 
-  use_bibata_cursor
+install_cursor_theme() {
+  step "Installing the cursor themes"
+
+  # Remove the copy an earlier version of this installer put in /usr/local/share/icons.
+  if [[ -d "$OLD_CURSOR_DIR/$BIBATA_ICE" && "$OLD_CURSOR_DIR" != "$CURSOR_SYSTEM_DIR" ]]; then
+    sudo rm -rf "${OLD_CURSOR_DIR:?}/$BIBATA_ICE"
+  fi
+
+  if install_bibata_variant "$BIBATA_ICE" "$BIBATA_ICE_SHA256"; then
+    use_bibata_cursor
+  else
+    warn "Using the Adwaita cursor."
+  fi
+
+  # Light mode cursor. Optional: without it the dark cursor stays in light mode.
+  if install_bibata_variant "$BIBATA_CLASSIC" "$BIBATA_CLASSIC_SHA256"; then
+    ok "Light mode cursor: $BIBATA_CLASSIC"
+  else
+    warn "Light mode will keep the dark cursor."
+  fi
 }
 
 install_packages() {

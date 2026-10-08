@@ -1,0 +1,9 @@
+# Noctalia hooks. Written by the installer.
+#
+# The cursor follows the Noctalia theme mode: Bibata Modern Ice in dark mode,
+# Bibata Modern Classic in light mode. The script also runs once when Noctalia
+# starts, so the cursor matches the mode after every login.
+
+[hooks]
+started = "bash \"$HOME/.config/noctalia/hooks/cursor-sync.sh\""
+theme_mode_changed = "bash \"$HOME/.config/noctalia/hooks/cursor-sync.sh\""
