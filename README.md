@@ -46,7 +46,7 @@ bash install.sh
 
 - Session: `hyprland`, `uwsm`, `xdg-desktop-portal-hyprland`, `xdg-desktop-portal-gtk`, `noctalia`, `greetd`, `noctalia-greeter`
 - System: `pipewire`, `wireplumber`, `pipewire-pulse`, `networkmanager`, `polkit`, `gnome-keyring`, `dconf`, `xdg-utils`
-- Clipboard, screenshots and tools: `wl-clipboard`, `grim`, `slurp`, `satty`, `hyprpicker`, `btop`, `fastfetch`
+- Clipboard, screenshots and tools: `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `btop`, `fastfetch`
 - Terminal and theme: `kitty`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `breeze-icons`, `qt6ct`, `qt6-wayland`
 - Apps: `nautilus`, `loupe`, `papers`, `gnome-text-editor`, `gnome-calculator`, `decibels`, `showtime`, `brave-origin-bin`
 - Disks and files: `gvfs`, `gvfs-mtp`, `udisks2`, `exfatprogs`, `ntfs-3g`, `xdg-user-dirs-gtk`
