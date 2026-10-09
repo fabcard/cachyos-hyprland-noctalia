@@ -6,4 +6,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run ShellCheck
-        run: shellcheck -x -S warning install.sh scripts/*.sh
+        run: shellcheck -x -S warning install.sh scripts/*.sh configs/noctalia/hooks/*.sh
