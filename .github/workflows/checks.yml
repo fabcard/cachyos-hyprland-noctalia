@@ -1,0 +1,51 @@
+name: Checks
+on: [push, pull_request]
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax (bash -n)
+        run: |
+          status=0
+          for f in install.sh scripts/*.sh configs/noctalia/hooks/*.sh; do
+            bash -n "$f" || status=1
+          done
+          exit "$status"
+
+      - name: TOML files parse
+        run: |
+          python3 - <<'PY'
+          import pathlib, sys, tomllib
+          failed = False
+          files = sorted(pathlib.Path("configs").rglob("*.toml"))
+          for path in files:
+              try:
+                  with path.open("rb") as handle:
+                      tomllib.load(handle)
+              except Exception as error:
+                  print(f"FAIL {path}: {error}")
+                  failed = True
+          print(f"Checked {len(files)} TOML files")
+          sys.exit(1 if failed else 0)
+          PY
+
+      - name: Lua syntax
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.4
+          status=0
+          for f in $(find configs -name '*.lua' | sort); do
+            luac5.4 -p "$f" || status=1
+          done
+          exit "$status"
+
+      - name: No empty files
+        run: |
+          empty="$(find . -type f -empty -not -path './.git/*')"
+          if [ -n "$empty" ]; then
+            echo "Empty files:"
+            echo "$empty"
+            exit 1
+          fi
