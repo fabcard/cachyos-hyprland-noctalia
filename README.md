@@ -14,6 +14,12 @@ Run this from a TTY, as your normal user (not root):
 curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash
 ```
 
+To install a fixed release instead of the latest `main`, use its tag (see the [releases](https://github.com/fabcard/cachyos-hyprland-noctalia/releases)). Set `CHN_REF` on the `bash` side of the pipe:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/v0.1.0/install.sh | CHN_REF=v0.1.0 bash
+```
+
 Piping a script into a shell runs code you have not read. To read it first:
 
 ```sh
@@ -156,7 +162,22 @@ The number of workspaces per monitor is `NUM_WPM` in `~/.config/hypr/conf/variab
 
 Before replacing a file, the installer copies the old one to `~/.config-backup-YYYYMMDD-HHMMSS/`. Running the installer again is safe: packages already installed are skipped, files that did not change are left alone, and wallpapers you already have are kept.
 
-To restore a file, copy it back from the backup folder.
+To restore a file, copy it back from the backup folder. To undo everything at once, see [Uninstall](#uninstall).
+
+## Uninstall
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash -s -- --uninstall
+```
+
+If you installed a release, add `CHN_REF=<tag>` on the `bash` side, as in the install command. The uninstaller asks before each step:
+
+1. Disables the Noctalia Greeter: `greetd` and the passwordless login screen sync, and removes `greeter.toml`.
+2. Moves the config files written by the installer to `~/.config-removed-YYYYMMDD-HHMMSS/`. Nothing is deleted. Files you added yourself in the same folders stay where they are.
+3. Restores your old files from the oldest `~/.config-backup-*` folder, which holds the files from before the first install.
+4. Removes the Bibata cursor themes.
+
+Packages, wallpapers and `~/.local/state/noctalia` are not touched. Remove packages by hand with `sudo pacman -Rns <package>`. If the installer disabled another display manager, enable it again with `sudo systemctl enable <name>.service`.
 
 ## Login screen sync
 
@@ -175,8 +196,8 @@ rm ~/.config/noctalia/greeter-sync.toml
 
 Set these before the command:
 
-- `CHN_REF=<branch, tag or commit>`: version to download when you use `curl | bash`. The default is `main`.
-- `CHN_DEFAULTS=1`: never ask questions, use the default answer for each one.
+- `CHN_REF=<branch, tag or commit>`: version to download when you use `curl | bash`. The default is `main`. Put it on the `bash` side: `curl ... | CHN_REF=v0.1.0 bash`.
+- `CHN_DEFAULTS=1`: never ask questions, use the default answer for each one. With `--uninstall`, this also skips the first confirmation, so use it with care.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | CHN_DEFAULTS=1 bash
@@ -189,6 +210,15 @@ curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/m
 - **Hyprland too old:** run `sudo pacman -Syu` and try again. The installer needs 0.55 or newer.
 - **`noctalia` not found:** the `cachyos-extra-v3` repository is missing from `/etc/pacman.conf`, or the CPU does not support x86-64-v3.
 - **Wrong monitor name or no workspaces:** run `hyprctl monitors` and edit `MONITOR1` in `~/.config/hypr/conf/variables.lua`.
+
+## Development
+
+Every push runs two GitHub Actions workflows:
+
+- `ShellCheck`: `shellcheck -x -S warning` on `install.sh`, `scripts/*.sh` and the Noctalia hook scripts.
+- `Checks`: `bash -n` on every shell script, a parse of every `.toml` file under `configs/`, a syntax check of every `.lua` file with `luac5.4 -p`, and a check for empty files.
+
+Releases are tags named `vMAJOR.MINOR.PATCH`. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Credits
 

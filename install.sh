@@ -5,10 +5,17 @@
 # Usage (from a TTY):
 #   curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash
 #
+# Pin a release (tag):
+#   curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/v0.1.0/install.sh | CHN_REF=v0.1.0 bash
+#
+# Undo the installation (asks before each step):
+#   curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash -s -- --uninstall
+#
 # Built and tested on CachyOS (no desktop). Other Arch-based systems may work.
 #
 # Environment variables:
-#   CHN_REF=<ref>      Branch, tag or commit to download through curl (default: main)
+#   CHN_REF=<ref>      Branch, tag or commit to download through curl (default: main).
+#                      Set it on the "bash" side of the pipe, as in the example above.
 #   CHN_DEFAULTS=1     Never prompt, use the default answer for every question
 
 # Variables set here are read by the modules that install.sh sources.
@@ -27,6 +34,21 @@ INSTALL_WALLPAPERS=0
 INSTALL_GREETER_SYNC=0
 
 SCRIPT_DIR=""
+MODE="install"
+
+parse_args() {
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --uninstall) MODE="uninstall" ;;
+      *)
+        echo "Unknown option: $arg" >&2
+        echo "Usage: install.sh [--uninstall]" >&2
+        exit 2
+        ;;
+    esac
+  done
+}
 
 resolve_script_dir() {
   local script_path="${BASH_SOURCE[0]:-}"
@@ -75,8 +97,13 @@ load_module() {
 
 banner() {
   printf '\n%sCachyOS Hyprland + Noctalia installer%s\n' "$C_BOLD" "$C_RESET"
-  echo "Installs Hyprland, Noctalia Shell and Noctalia Greeter with a lean default setup."
-  echo "Built and tested on CachyOS (no desktop selected in the installer)."
+  if [[ "$MODE" == "uninstall" ]]; then
+    echo "Undoes the changes made by the installer. Every step asks first."
+  else
+    echo "Installs Hyprland, Noctalia Shell and Noctalia Greeter with a lean default setup."
+    echo "Built and tested on CachyOS (no desktop selected in the installer)."
+  fi
+  echo "Version: ${REPO_REF}"
   echo
 }
 
@@ -110,7 +137,19 @@ finish() {
   fi
 }
 
+uninstall() {
+  load_module configs
+  load_module services
+  load_module uninstall
+
+  banner
+  require_not_root
+  check_sudo
+  run_uninstall
+}
+
 main() {
+  parse_args "$@"
   resolve_script_dir
   if [[ -z "$SCRIPT_DIR" ]]; then
     bootstrap "$@"
@@ -119,6 +158,11 @@ main() {
 
   load_module lib
   trap stop_sudo_keepalive EXIT
+
+  if [[ "$MODE" == "uninstall" ]]; then
+    uninstall
+    return
+  fi
 
   banner
   require_not_root
