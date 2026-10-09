@@ -5,16 +5,13 @@
 # Usage (from a TTY):
 #   curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash
 #
-# Pin a release (tag):
-#   curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/v0.1.0/install.sh | CHN_REF=v0.1.0 bash
-#
 # Undo the installation (asks before each step):
 #   curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash -s -- --uninstall
 #
 # Built and tested on CachyOS (no desktop). Other Arch-based systems may work.
 #
 # Environment variables:
-#   CHN_REF=<ref>      Branch, tag or commit to download through curl (default: main).
+#   CHN_REF=<ref>      Branch or commit to download through curl (default: main).
 #                      Set it on the "bash" side of the pipe, as in the example above.
 #   CHN_DEFAULTS=1     Never prompt, use the default answer for every question
 

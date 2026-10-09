@@ -14,12 +14,6 @@ Run this from a TTY, as your normal user (not root):
 curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash
 ```
 
-To install a fixed release instead of the latest `main`, use its tag (see the [releases](https://github.com/fabcard/cachyos-hyprland-noctalia/releases)). Set `CHN_REF` on the `bash` side of the pipe:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/v0.1.0/install.sh | CHN_REF=v0.1.0 bash
-```
-
 Piping a script into a shell runs code you have not read. To read it first:
 
 ```sh
@@ -170,7 +164,7 @@ To restore a file, copy it back from the backup folder. To undo everything at on
 curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash -s -- --uninstall
 ```
 
-If you installed a release, add `CHN_REF=<tag>` on the `bash` side, as in the install command. The uninstaller asks before each step:
+If you installed with `CHN_REF`, use the same `CHN_REF` here, on the `bash` side. The uninstaller asks before each step:
 
 1. Disables the Noctalia Greeter: `greetd` and the passwordless login screen sync, and removes `greeter.toml`.
 2. Moves the config files written by the installer to `~/.config-removed-YYYYMMDD-HHMMSS/`. Nothing is deleted. Files you added yourself in the same folders stay where they are.
@@ -196,7 +190,7 @@ rm ~/.config/noctalia/greeter-sync.toml
 
 Set these before the command:
 
-- `CHN_REF=<branch, tag or commit>`: version to download when you use `curl | bash`. The default is `main`. Put it on the `bash` side: `curl ... | CHN_REF=v0.1.0 bash`.
+- `CHN_REF=<branch or commit>`: version to download when you use `curl | bash`. The default is `main`. Put it on the `bash` side: `curl ... | CHN_REF=<commit> bash`.
 - `CHN_DEFAULTS=1`: never ask questions, use the default answer for each one. With `--uninstall`, this also skips the first confirmation, so use it with care.
 
 ```sh
@@ -217,8 +211,6 @@ Every push runs two GitHub Actions workflows:
 
 - `ShellCheck`: `shellcheck -x -S warning` on `install.sh`, `scripts/*.sh` and the Noctalia hook scripts.
 - `Checks`: `bash -n` on every shell script, a parse of every `.toml` file under `configs/`, a syntax check of every `.lua` file with `luac5.4 -p`, and a check for empty files.
-
-Releases are tags named `vMAJOR.MINOR.PATCH`. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Credits
 
