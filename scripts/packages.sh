@@ -26,7 +26,6 @@ REQUIRED_PKGS=(
   polkit
   grim
   slurp
-  satty
   wl-clipboard
   gnome-keyring
   dconf
