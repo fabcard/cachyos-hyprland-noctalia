@@ -57,8 +57,10 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag())
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize())
 
 -- Zoom
+-- hl.get_config takes the dotted name ("cursor.zoom_factor"), as in the Hyprland wiki.
+-- The key for "+" is "equal": "plus" needs Shift, so SUPER + plus never matched.
 local function zoomfunction(value)
-    local zoomvalue = hl.get_config("cursor:zoom_factor")
+    local zoomvalue = hl.get_config("cursor.zoom_factor")
     if (zoomvalue + value) > 3.0 then
         hl.config({ cursor = { zoom_factor = 3.0 } })
     elseif (zoomvalue + value) < 1.0 then
@@ -68,7 +70,7 @@ local function zoomfunction(value)
     end
 end
 hl.bind(mainMod .. " + Minus", function() zoomfunction(-0.3) end, { repeating = true})
-hl.bind(mainMod .. " + Plus", function() zoomfunction(0.3) end, { repeating = true })
+hl.bind(mainMod .. " + equal", function() zoomfunction(0.3) end, { repeating = true })
 
 --# Zoom with keypad
 hl.bind(mainMod .. " + code:82", function() zoomfunction(-0.3) end, { repeating = true })

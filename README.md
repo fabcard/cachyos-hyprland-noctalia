@@ -137,7 +137,7 @@ Windows:
 - `SUPER + arrows`: move focus, add `SHIFT` to move the window
 - `ALT + Tab`: cycle windows
 - `SUPER + mouse drag`: move (left button) or resize (right button)
-- `SUPER + minus` and `SUPER + plus`: zoom
+- `SUPER + minus` and `SUPER + equal` (the `+` key, no Shift), or `SUPER` with the keypad `-` and `+`: zoom the screen around the cursor, from 1x to 3x
 
 Workspaces and monitors:
 - `SUPER + ALT + 1..0`: go to a workspace by number
