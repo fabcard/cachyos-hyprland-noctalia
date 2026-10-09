@@ -11,8 +11,6 @@
 # Built and tested on CachyOS (no desktop). Other Arch-based systems may work.
 #
 # Environment variables:
-#   CHN_REF=<ref>      Branch or commit to download through curl (default: main).
-#                      Set it on the "bash" side of the pipe, as in the example above.
 #   CHN_DEFAULTS=1     Never prompt, use the default answer for every question
 
 # Variables set here are read by the modules that install.sh sources.
@@ -21,7 +19,7 @@ set -euo pipefail
 
 REPO_OWNER="fabcard"
 REPO_NAME="cachyos-hyprland-noctalia"
-REPO_REF="${CHN_REF:-main}"
+REPO_REF="main"
 TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/${REPO_REF}.tar.gz"
 
 # Answers collected by ask_options, used by the modules.
@@ -100,7 +98,6 @@ banner() {
     echo "Installs Hyprland, Noctalia Shell and Noctalia Greeter with a lean default setup."
     echo "Built and tested on CachyOS (no desktop selected in the installer)."
   fi
-  echo "Version: ${REPO_REF}"
   echo
 }
 

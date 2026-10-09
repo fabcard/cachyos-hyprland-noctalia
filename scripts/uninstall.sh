@@ -242,7 +242,6 @@ run_uninstall() {
   info "  3. restore your old files from the oldest ~/.config-backup-* folder"
   info "  4. remove the Bibata cursor themes"
   info "Packages, wallpapers and ~/.local/state/noctalia are not touched."
-  info "The file list comes from the version being run. Use the same CHN_REF you installed with."
 
   if [[ "${CHN_DEFAULTS:-0}" != "1" ]]; then
     if ! ask_yes_no "Continue?" n; then

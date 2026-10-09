@@ -164,7 +164,7 @@ To restore a file, copy it back from the backup folder. To undo everything at on
 curl -fsSL https://raw.githubusercontent.com/fabcard/cachyos-hyprland-noctalia/main/install.sh | bash -s -- --uninstall
 ```
 
-If you installed with `CHN_REF`, use the same `CHN_REF` here, on the `bash` side. The uninstaller asks before each step:
+The uninstaller asks before each step:
 
 1. Disables the Noctalia Greeter: `greetd` and the passwordless login screen sync, and removes `greeter.toml`.
 2. Moves the config files written by the installer to `~/.config-removed-YYYYMMDD-HHMMSS/`. Nothing is deleted. Files you added yourself in the same folders stay where they are.
@@ -188,9 +188,8 @@ rm ~/.config/noctalia/greeter-sync.toml
 
 ## Options
 
-Set these before the command:
+Set this before `bash`:
 
-- `CHN_REF=<branch or commit>`: version to download when you use `curl | bash`. The default is `main`. Put it on the `bash` side: `curl ... | CHN_REF=<commit> bash`.
 - `CHN_DEFAULTS=1`: never ask questions, use the default answer for each one. With `--uninstall`, this also skips the first confirmation, so use it with care.
 
 ```sh
