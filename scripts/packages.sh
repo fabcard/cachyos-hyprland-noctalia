@@ -30,6 +30,7 @@ REQUIRED_PKGS=(
   gnome-keyring
   dconf
   kitty
+  xdg-terminal-exec
   xdg-utils
 )
 

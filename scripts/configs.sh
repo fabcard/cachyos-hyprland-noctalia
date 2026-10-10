@@ -422,6 +422,7 @@ install_configs() {
   install_tree qt6ct
   install_dir "$CONFIGS_DIR/icons/default" "$HOME/.icons/default"
   seed_file "$CONFIGS_DIR/kdeglobals" "$CONFIG_HOME/kdeglobals"
+  seed_file "$CONFIGS_DIR/xdg-terminals.list" "$CONFIG_HOME/xdg-terminals.list"
   install_mimeapps
   write_noctalia_templates
   install_btop_config

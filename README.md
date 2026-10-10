@@ -47,7 +47,7 @@ bash install.sh
 - Session: `hyprland`, `uwsm`, `xdg-desktop-portal-hyprland`, `xdg-desktop-portal-gtk`, `noctalia`, `greetd`, `noctalia-greeter`
 - System: `pipewire`, `wireplumber`, `pipewire-pulse`, `networkmanager`, `polkit`, `gnome-keyring`, `dconf`, `xdg-utils`
 - Clipboard, screenshots and tools: `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `btop`, `fastfetch`
-- Terminal and theme: `kitty`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `breeze-icons`, `qt6ct`, `qt6-wayland`
+- Terminal and theme: `kitty`, `xdg-terminal-exec`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `breeze-icons`, `qt6ct`, `qt6-wayland`
 - Apps: `nautilus`, `loupe`, `papers`, `gnome-text-editor`, `gnome-calculator`, `decibels`, `showtime`, `brave-origin-bin`
 - Disks and files: `gvfs`, `gvfs-mtp`, `udisks2`, `exfatprogs`, `ntfs-3g`, `xdg-user-dirs-gtk`
 - Fonts: `ttf-jetbrains-mono-nerd`, `noto-fonts`, `noto-fonts-emoji`
@@ -78,7 +78,7 @@ Files are copied to `~/.config`. The installer fills in the keyboard layout (rea
 - `~/.config/noctalia/`: dark mode, wallpaper folder, the polkit agent, the theme templates (see below) and the cursor hook.
 - `~/.config/kdeglobals`: selects the Noctalia color scheme for KDE-framework apps. Created only if it does not exist, because Noctalia may edit it later.
 - `~/.config/uwsm/env` and `env-hyprland`: cursor, Qt and Electron variables.
-- `~/.config/kitty/kitty.conf`, `~/.config/gtk-3.0/`, `~/.config/gtk-4.0/`, `~/.config/qt6ct/qt6ct.conf`, `~/.icons/default/index.theme`
+- `~/.config/kitty/kitty.conf`, `~/.config/gtk-3.0/`, `~/.config/gtk-4.0/`, `~/.config/qt6ct/qt6ct.conf`, `~/.icons/default/index.theme`, `~/.config/xdg-terminals.list` (kitty is the terminal for "Run as a Program" in Nautilus; written only if the file does not exist)
 - `~/.config/mimeapps.list`: Brave, Nautilus, Loupe, Showtime, Decibels, Papers and GNOME Text Editor. Entries for apps that are not installed are left out.
 - `/etc/greetd/config.toml` and `/var/lib/noctalia-greeter/greeter.toml` for the login screen.
 
