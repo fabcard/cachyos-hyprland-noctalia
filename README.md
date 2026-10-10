@@ -55,6 +55,10 @@ bash install.sh
 
 Everything comes from the repositories, except the cursor theme (see below). No AUR helper is installed. If a package is missing from the repositories, the installer only tries the AUR when `shelly`, `paru` or `yay` is already on the system, and it asks first.
 
+### GPU
+
+The installer reads the GPU vendor from the kernel. On AMD or Intel nothing changes. When the proprietary NVIDIA driver is loaded and no AMD or Intel GPU is present (same rule as CachyOS), it adds `GBM_BACKEND`, `EGL_PLATFORM`, `__GLX_VENDOR_LIBRARY_NAME` and `LIBVA_DRIVER_NAME` to `~/.config/uwsm/env`. It warns if `nvidia_drm` modeset is off. Drivers are not installed; the CachyOS installer already does that.
+
 ### Cursor
 
 Bibata Modern Ice (dark mode) and Bibata Modern Classic (light mode) are downloaded from the [upstream releases](https://github.com/ful1e5/Bibata_Cursor/releases) (version pinned in `scripts/packages.sh`, SHA-256 pinned) and installed to `/usr/share/icons`. Every toolkit searches that folder, and every user can read it, including the greeter, which runs as a different user. If the Ice download fails, the installer uses the Adwaita cursor and keeps going. If the Classic download fails, light mode keeps the dark cursor.

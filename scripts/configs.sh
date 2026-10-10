@@ -7,6 +7,9 @@
 #
 # Placeholders: @KB_LAYOUT@ @KB_VARIANT@ @BROWSER_DESKTOP@ @HOME@ @CURSOR_THEME@
 # @CURSOR_PATH@ @MONITOR1@ @MONITOR2@ @MONITOR3@
+#
+# Lines starting with @NVIDIA@ are kept (prefix removed) on NVIDIA-only systems
+# and dropped on everything else.
 
 CONFIGS_DIR="${CONFIGS_DIR:-${SCRIPT_DIR:-.}/configs}"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -32,6 +35,8 @@ CURSOR_THEME="${CURSOR_THEME:-Adwaita}"
 CURSOR_PATH="${CURSOR_PATH:-/usr/share/icons}"
 GREETER_SYNC_OK=0
 BTOP_TEMPLATE=0
+GPU_NVIDIA=0
+NVIDIA_MODULE_DIR="${NVIDIA_MODULE_DIR:-/sys/module}"
 
 # ---------------------------------------------------------------------------
 # Detection
@@ -116,6 +121,43 @@ detect_monitors() {
   fi
 }
 
+# Detect the GPU vendor from the kernel. Same rule as CachyOS: the NVIDIA
+# environment is used only when the proprietary NVIDIA driver is loaded and no
+# AMD or Intel GPU is present. Drivers are installed by the CachyOS installer.
+detect_gpu() {
+  local vendor_file vendor has_nvidia=0 has_other=0
+
+  for vendor_file in "$DRM_DIR"/card*/device/vendor; do
+    [[ -r "$vendor_file" ]] || continue
+    vendor="$(<"$vendor_file")"
+    case "$vendor" in
+      0x10de) has_nvidia=1 ;;
+      0x1002 | 0x8086) has_other=1 ;;
+    esac
+  done
+
+  if (( ! has_nvidia )); then
+    info "GPU: AMD/Intel (or other), default setup."
+    return 0
+  fi
+
+  if (( has_other )); then
+    info "GPU: NVIDIA plus AMD/Intel detected, keeping the default setup."
+    return 0
+  fi
+
+  if [[ ! -d "$NVIDIA_MODULE_DIR/nvidia" ]]; then
+    warn "NVIDIA GPU found, but the proprietary driver is not loaded. Keeping the default setup."
+    return 0
+  fi
+
+  GPU_NVIDIA=1
+  info "GPU: NVIDIA, adding NVIDIA environment variables."
+  if [[ "$(cat "$NVIDIA_MODULE_DIR/nvidia_drm/parameters/modeset" 2>/dev/null)" != "Y" ]]; then
+    warn "nvidia_drm modeset is off. Hyprland needs it. Add nvidia-drm.modeset=1 to the kernel command line."
+  fi
+}
+
 # ---------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------
@@ -124,8 +166,10 @@ sed_escape() { printf '%s' "$1" | sed -e 's/[\/&|]/\\&/g'; }
 
 # Print a config file with placeholders filled in.
 render_stdout() {
-  local src="$1"
+  local src="$1" nvidia_sed='/^@NVIDIA@/d'
+  [[ "$GPU_NVIDIA" == "1" ]] && nvidia_sed='s|^@NVIDIA@||'
   sed \
+    -e "$nvidia_sed" \
     -e "s|@KB_LAYOUT@|$(sed_escape "$KB_LAYOUT")|g" \
     -e "s|@KB_VARIANT@|$(sed_escape "$KB_VARIANT")|g" \
     -e "s|@BROWSER_DESKTOP@|$(sed_escape "$BROWSER_DESKTOP")|g" \
@@ -409,6 +453,7 @@ install_configs() {
   detect_keyboard
   detect_browser
   detect_monitors
+  detect_gpu
 
   mkdir -p "$WALLPAPER_DIR"
   warn_old_hypr_conf
