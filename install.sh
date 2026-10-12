@@ -27,6 +27,7 @@ INSTALL_BLUETOOTH=0
 INSTALL_SMB=0
 INSTALL_WALLPAPERS=0
 INSTALL_GREETER_SYNC=0
+INSTALL_CHAOTIC=0
 
 SCRIPT_DIR=""
 MODE="install"
@@ -116,6 +117,11 @@ ask_options() {
   info "Syncing the login screen runs a fixed helper as root. A polkit rule can allow it for your user without a password."
   if ask_yes_no "Sync wallpaper and colors to the login screen without a password prompt?" y; then
     INSTALL_GREETER_SYNC=1
+  fi
+
+  info "Chaotic-AUR is a third-party binary repository (prebuilt AUR packages). It is added after the official ones and trusts its signing key."
+  if ask_yes_no "Add the Chaotic-AUR repository?" y; then
+    INSTALL_CHAOTIC=1
   fi
 }
 

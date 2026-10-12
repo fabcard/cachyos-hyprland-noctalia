@@ -83,6 +83,12 @@ OLD_CURSOR_DIR="${OLD_CURSOR_DIR:-/usr/local/share/icons}" # used by an earlier 
 CURSOR_THEME="Adwaita"
 CURSOR_PATH="/usr/share/icons"
 
+# Chaotic-AUR (third-party repo), from https://github.com/chaotic-aur (docs at aur.chaotic.cx).
+CHAOTIC_KEY="3056513887B78AEB"
+CHAOTIC_KEYSERVER="keyserver.ubuntu.com"
+CHAOTIC_CDN="https://cdn-mirror.chaotic.cx/chaotic-aur"
+PACMAN_CONF="${PACMAN_CONF:-/etc/pacman.conf}"
+
 BLUETOOTH_PKGS=(bluez bluez-utils)
 SMB_PKGS=(gvfs-smb)
 
@@ -258,8 +264,36 @@ install_cursor_theme() {
   fi
 }
 
+# Optional. On failure it warns and the install goes on without the repo.
+# The section is only appended (never edited), so no backup is needed. It goes
+# last, so the CachyOS and Arch repositories keep priority. The "pacman -Syu"
+# that follows downloads the new repository database.
+setup_chaotic_aur() {
+  step "Adding the Chaotic-AUR repository"
+
+  if ! { pkg_installed chaotic-keyring && pkg_installed chaotic-mirrorlist; }; then
+    if ! sudo pacman-key --recv-key "$CHAOTIC_KEY" --keyserver "$CHAOTIC_KEYSERVER" \
+      || ! sudo pacman-key --lsign-key "$CHAOTIC_KEY" \
+      || ! sudo pacman -U "$CHAOTIC_CDN/chaotic-keyring.pkg.tar.zst" "$CHAOTIC_CDN/chaotic-mirrorlist.pkg.tar.zst"; then
+      warn "Could not set up Chaotic-AUR. Continuing without it."
+      return 0
+    fi
+  fi
+
+  if grep -q '^\[chaotic-aur\]' "$PACMAN_CONF"; then
+    info "chaotic-aur is already in $PACMAN_CONF."
+  else
+    printf '\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist\n' | sudo tee -a "$PACMAN_CONF" >/dev/null
+  fi
+  ok "Chaotic-AUR enabled."
+}
+
 install_packages() {
   local pkg
+
+  if [[ "${INSTALL_CHAOTIC:-0}" == "1" ]]; then
+    setup_chaotic_aur
+  fi
 
   step "Updating the system"
   sudo pacman -Syu

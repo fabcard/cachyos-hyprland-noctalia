@@ -33,11 +33,12 @@ bash install.sh
 ## What it does
 
 1. Checks the system: not root, CachyOS or Arch-based, internet, sudo, and no other desktop or display manager (it asks before continuing if it finds one).
-2. Asks four questions, then runs without interruptions:
+2. Asks five questions, then runs without interruptions:
    - Install Bluetooth packages and enable the service? (default: no)
    - Install network share (SMB) support for Nautilus? (default: no)
    - Download the wallpaper pack to `~/Pictures/Wallpapers`? (default: no)
    - Sync wallpaper and colors to the login screen without a password prompt? (default: no)
+   - Add the Chaotic-AUR repository? (default: no)
 3. Runs a full system update (`pacman -Syu`), installs the packages and downloads the cursor theme.
 4. Writes the greetd configuration and enables the services.
 5. Installs the configuration files, backing up anything it replaces.
@@ -54,6 +55,10 @@ bash install.sh
 - Optional: `bluez`, `bluez-utils`, `gvfs-smb`
 
 Everything comes from the repositories, except the cursor theme (see below). No AUR helper is installed. If a package is missing from the repositories, the installer only tries the AUR when `shelly`, `paru` or `yay` is already on the system, and it asks first.
+
+### Chaotic-AUR
+
+If you say yes, the installer imports the Chaotic-AUR signing key, installs `chaotic-keyring` and `chaotic-mirrorlist`, and appends `[chaotic-aur]` to the end of `/etc/pacman.conf`. The full system update that follows downloads its database. It is a third-party repository of prebuilt AUR packages, so it adds trust in its maintainers. Because it sits last, CachyOS and Arch repositories win when a package exists in both. Packages missing from the official repositories can then come from it. If the setup fails, the installer warns and continues without it. The uninstaller does not remove it; to undo it, delete the `[chaotic-aur]` section from `/etc/pacman.conf` and run `sudo pacman -Rns chaotic-keyring chaotic-mirrorlist`.
 
 ### GPU
 
