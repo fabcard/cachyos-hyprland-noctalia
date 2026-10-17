@@ -37,7 +37,7 @@ bash install.sh
    - Install Bluetooth packages and enable the service? (default: no)
    - Install network share (SMB) support for Nautilus? (default: no)
    - Download the wallpaper pack to `~/Pictures/Wallpapers`? (default: yes)
-   - Sync wallpaper and colors to the login screen without a password prompt? (default: yse)
+   - Sync wallpaper and colors to the login screen without a password prompt? (default: yes)
    - Add the Chaotic-AUR repository? (default: yes)
 3. Runs a full system update (`pacman -Syu`), installs the packages and downloads the cursor theme.
 4. Writes the greetd configuration and enables the services.
