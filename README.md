@@ -103,7 +103,7 @@ Choices you make later in the Noctalia settings window are saved by Noctalia in 
 
 ## Gaming
 
-Games are sent to a workspace named `gaming` on the primary monitor. The rules match Steam games (`steam_app.*`), `gamescope`, and windows that report themselves as games. They also start those games fullscreen. Adaptive sync (`vrr`) and direct scanout are on for fullscreen games only.
+Steam opens on the first workspace after the numbered ones (4 with the default 3 per monitor) and games on the next one (5). Both are created when a window is on them, and are not persistent. Nautilus opens floating and centered. The rules match Steam games (`steam_app.*`), `gamescope`, and windows that report themselves as games. They also start those games fullscreen. Adaptive sync (`vrr`) and direct scanout are on for fullscreen games only.
 
 ## Keybinds
 
