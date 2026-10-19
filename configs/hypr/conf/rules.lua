@@ -22,6 +22,8 @@ hl.window_rule({ match = { xdg_tag = "^(.*game.*)$" }, workspace = gamingWorkspa
 hl.window_rule({ match = { class = gamingApps }, workspace = gamingWorkspace })
 -- Steam client on its own workspace. The "Launching..." window matches too, so it opens next to Steam.
 hl.window_rule({ match = { class = "^(steam)$" }, workspace = STEAM_WORKSPACE })
+-- Main and login windows open floating at the top-left corner. Center them (not the friends list or toasts).
+hl.window_rule({ match = { class = "^(steam)$", title = "negative:^(Friends List|notificationtoasts.*)$" }, center = true })
 hl.window_rule({ match = { class = "^(steam)$", title = "^(Friends List)$" }, float = true })
 hl.window_rule({ match = { class = "^(steam)$", title = "^(Launching\\.{3})$" }, float = true, center = true })
 hl.window_rule({
