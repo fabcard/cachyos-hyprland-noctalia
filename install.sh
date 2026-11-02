@@ -25,7 +25,8 @@ TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/${REPO_REF}.t
 # Answers collected by ask_options, used by the modules.
 INSTALL_BLUETOOTH=0
 INSTALL_SMB=0
-INSTALL_WALLPAPERS=0
+INSTALL_WALLPAPERS_MINIMALISTIC=0
+INSTALL_WALLPAPERS_DT=0
 INSTALL_GREETER_SYNC=0
 INSTALL_CHAOTIC=0
 
@@ -110,8 +111,11 @@ ask_options() {
   if ask_yes_no "Install network share (SMB) support for Nautilus?" n; then
     INSTALL_SMB=1
   fi
-  if ask_yes_no "Download the wallpaper pack to ~/Pictures/Wallpapers?" y; then
-    INSTALL_WALLPAPERS=1
+  if ask_yes_no "Download the Minimalistic wallpaper pack to ~/Pictures/Wallpapers/Minimalistic?" n; then
+    INSTALL_WALLPAPERS_MINIMALISTIC=1
+  fi
+  if ask_yes_no "Download the DT (Derek Taylor) wallpaper pack to ~/Pictures/Wallpapers/DT?" y; then
+    INSTALL_WALLPAPERS_DT=1
   fi
 
   info "Syncing the login screen runs a fixed helper as root. A polkit rule can allow it for your user without a password."
@@ -180,7 +184,7 @@ main() {
   install_packages
   enable_services
   install_configs
-  if [[ "$INSTALL_WALLPAPERS" == "1" ]]; then
+  if [[ "$INSTALL_WALLPAPERS_MINIMALISTIC" == "1" || "$INSTALL_WALLPAPERS_DT" == "1" ]]; then
     install_wallpapers
   fi
 

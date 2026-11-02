@@ -33,10 +33,11 @@ bash install.sh
 ## What it does
 
 1. Checks the system: not root, CachyOS or Arch-based, internet, sudo, and no other desktop or display manager (it asks before continuing if it finds one).
-2. Asks five questions, then runs without interruptions:
+2. Asks six questions, then runs without interruptions:
    - Install Bluetooth packages and enable the service? (default: no)
    - Install network share (SMB) support for Nautilus? (default: no)
-   - Download the wallpaper pack to `~/Pictures/Wallpapers`? (default: yes)
+   - Download the Minimalistic wallpaper pack to `~/Pictures/Wallpapers/Minimalistic`? (default: no)
+   - Download the DT wallpaper pack to `~/Pictures/Wallpapers/DT`? (default: yes)
    - Sync wallpaper and colors to the login screen without a password prompt? (default: yes)
    - Add the Chaotic-AUR repository? (default: yes)
 3. Runs a full system update (`pacman -Syu`), installs the packages and downloads the cursor theme.
@@ -226,7 +227,7 @@ Every push runs two GitHub Actions workflows:
 - [Noctalia](https://docs.noctalia.dev/)
 - The [CachyOS Hyprland + Noctalia setup](https://github.com/CachyOS/cachyos-hypr-noctalia): keybinds, animations, window rules, colors, look and miscellaneous settings, adapted here.
 - [Bibata Cursor](https://github.com/ful1e5/Bibata_Cursor) by ful1e5, downloaded at install time.
-- Wallpapers (optional download): [minimalistic-wallpaper-collection](https://github.com/DenverCoder1/minimalistic-wallpaper-collection). The images belong to their original artists.
+- Wallpapers (optional downloads): [minimalistic-wallpaper-collection](https://github.com/DenverCoder1/minimalistic-wallpaper-collection) and [DT wallpapers](https://gitlab.com/dwt1/wallpapers). The images belong to their original artists.
 
 ## License
 
