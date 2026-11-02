@@ -17,9 +17,9 @@ REMOVED_DIR=""
 UNINSTALL_TREES=(hypr noctalia kitty uwsm gtk-3.0 gtk-4.0 qt6ct btop)
 # Files the installer generates, relative to $CONFIG_HOME.
 UNINSTALL_GENERATED=(noctalia/templates.toml noctalia/greeter-sync.toml)
-UNINSTALL_CURSORS=(Bibata-Modern-Ice Bibata-Modern-Classic)
-# Folders that may hold the cursors. CHN_CURSOR_DIRS overrides it (used by tests).
-UNINSTALL_CURSOR_DIRS="${CHN_CURSOR_DIRS:-/usr/share/icons /usr/local/share/icons}"
+UNINSTALL_ICON_THEMES=(Bibata-Modern-Ice Bibata-Modern-Classic MoreWaita)
+# Folders that may hold them. CHN_CURSOR_DIRS overrides it (used by tests).
+UNINSTALL_ICON_DIRS="${CHN_CURSOR_DIRS:-/usr/share/icons}"
 
 # Move a file or folder out of the way, keeping its path under $REMOVED_DIR.
 # Returns 1 when there is nothing to move.
@@ -210,18 +210,18 @@ restore_backup() {
   ok "Restored $count files."
 }
 
-uninstall_cursors() {
+uninstall_icon_themes() {
   local dir name path dirs=()
 
-  step "Cursor themes"
-  if ! ask_yes_no "Remove the Bibata cursor themes the installer downloaded?" y; then
+  step "Cursor and icon themes"
+  if ! ask_yes_no "Remove the Bibata cursor themes and the MoreWaita icon theme the installer downloaded?" y; then
     info "Skipped."
     return 0
   fi
 
-  read -r -a dirs <<<"$UNINSTALL_CURSOR_DIRS"
+  read -r -a dirs <<<"$UNINSTALL_ICON_DIRS"
   for dir in "${dirs[@]}"; do
-    for name in "${UNINSTALL_CURSORS[@]}"; do
+    for name in "${UNINSTALL_ICON_THEMES[@]}"; do
       path="$dir/$name"
       [[ -d "$path" ]] || continue
       if pacman -Qo "$path" >/dev/null 2>&1; then
@@ -240,7 +240,7 @@ run_uninstall() {
   info "  1. disable the Noctalia Greeter and the passwordless sync"
   info "  2. move the config files written by the installer to a removal folder"
   info "  3. restore your old files from the oldest ~/.config-backup-* folder"
-  info "  4. remove the Bibata cursor themes"
+  info "  4. remove the Bibata cursor themes and the MoreWaita icon theme"
   info "Packages, wallpapers and ~/.local/state/noctalia are not touched."
 
   if [[ "${CHN_DEFAULTS:-0}" != "1" ]]; then
@@ -253,7 +253,7 @@ run_uninstall() {
   uninstall_greeter
   uninstall_configs
   restore_backup
-  uninstall_cursors
+  uninstall_icon_themes
 
   step "Done"
   ok "Uninstall finished."

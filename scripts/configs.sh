@@ -5,7 +5,7 @@
 # in. Existing files are backed up first. Files that did not change are left
 # alone, so running the installer twice is safe.
 #
-# Placeholders: @KB_LAYOUT@ @KB_VARIANT@ @BROWSER_DESKTOP@ @HOME@ @CURSOR_THEME@
+# Placeholders: @KB_LAYOUT@ @KB_VARIANT@ @BROWSER_DESKTOP@ @HOME@ @CURSOR_THEME@ @ICON_THEME@
 # @CURSOR_PATH@ @MONITOR1@ @MONITOR2@ @MONITOR3@
 #
 # Lines starting with @NVIDIA@ are kept (prefix removed) on NVIDIA-only systems
@@ -32,6 +32,7 @@ MONITOR1=""
 MONITOR2=""
 MONITOR3=""
 CURSOR_THEME="${CURSOR_THEME:-Adwaita}"
+ICON_THEME="${ICON_THEME:-Adwaita}"
 CURSOR_PATH="${CURSOR_PATH:-/usr/share/icons}"
 GREETER_SYNC_OK=0
 BTOP_TEMPLATE=0
@@ -175,6 +176,7 @@ render_stdout() {
     -e "s|@BROWSER_DESKTOP@|$(sed_escape "$BROWSER_DESKTOP")|g" \
     -e "s|@HOME@|$(sed_escape "$HOME")|g" \
     -e "s|@CURSOR_THEME@|$(sed_escape "$CURSOR_THEME")|g" \
+    -e "s|@ICON_THEME@|$(sed_escape "$ICON_THEME")|g" \
     -e "s|@CURSOR_PATH@|$(sed_escape "$CURSOR_PATH")|g" \
     -e "s|@MONITOR1@|$(sed_escape "$MONITOR1")|g" \
     -e "s|@MONITOR2@|$(sed_escape "$MONITOR2")|g" \
@@ -385,7 +387,7 @@ apply_gsettings() {
   local settings=(
     "color-scheme prefer-dark"
     "gtk-theme adw-gtk3-dark"
-    "icon-theme Adwaita"
+    "icon-theme $ICON_THEME"
     "cursor-theme $CURSOR_THEME"
     "cursor-size 24"
   )
@@ -437,12 +439,6 @@ TOML
   ok "Login screen sync enabled."
 }
 
-warn_old_hypr_conf() {
-  if [[ -f "$CONFIG_HOME/hypr/hyprland.conf" ]]; then
-    warn "Found an old $CONFIG_HOME/hypr/hyprland.conf. Hyprland 0.55 uses hyprland.lua; consider removing the .conf."
-  fi
-}
-
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
@@ -456,7 +452,6 @@ install_configs() {
   detect_gpu
 
   mkdir -p "$WALLPAPER_DIR"
-  warn_old_hypr_conf
 
   install_tree hypr
   install_tree noctalia

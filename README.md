@@ -49,7 +49,7 @@ bash install.sh
 - Session: `hyprland`, `uwsm`, `xdg-desktop-portal-hyprland`, `xdg-desktop-portal-gtk`, `noctalia`, `greetd`, `noctalia-greeter`
 - System: `pipewire`, `wireplumber`, `pipewire-pulse`, `networkmanager`, `polkit`, `gnome-keyring`, `dconf`, `xdg-utils`
 - Clipboard, screenshots and tools: `wl-clipboard`, `grim`, `slurp`, `hyprpicker`, `btop`, `fastfetch`
-- Terminal and theme: `kitty`, `xdg-terminal-exec`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `breeze-icons`, `qt6ct`, `qt6-wayland`
+- Terminal and theme: `kitty`, `xdg-terminal-exec`, `nwg-look`, `adw-gtk-theme`, `adwaita-icon-theme`, `adwaita-icon-theme-legacy`, `breeze-icons`, `qt6ct`, `qt6-wayland`
 - Apps: `nautilus`, `loupe`, `papers`, `gnome-text-editor`, `gnome-calculator`, `decibels`, `showtime`, `brave-origin-bin`
 - Disks and files: `gvfs`, `gvfs-mtp`, `udisks2`, `exfatprogs`, `ntfs-3g`, `xdg-user-dirs-gtk`
 - Fonts: `ttf-jetbrains-mono-nerd`, `noto-fonts`, `noto-fonts-emoji`
@@ -67,13 +67,17 @@ The installer reads the GPU vendor from the kernel. On AMD or Intel nothing chan
 
 ### Cursor
 
-Bibata Modern Ice (dark mode) and Bibata Modern Classic (light mode) are downloaded from the [upstream releases](https://github.com/ful1e5/Bibata_Cursor/releases) (version pinned in `scripts/packages.sh`, SHA-256 pinned) and installed to `/usr/share/icons`. Every toolkit searches that folder, and every user can read it, including the greeter, which runs as a different user. If the Ice download fails, the installer uses the Adwaita cursor and keeps going. If the Classic download fails, light mode keeps the dark cursor.
+Bibata Modern Ice (dark mode) and Bibata Modern Classic (light mode) are downloaded from the [upstream releases](https://github.com/ful1e5/Bibata_Cursor/releases) (always the latest release, no checksum) and installed to `/usr/share/icons`. Every toolkit searches that folder, and every user can read it, including the greeter, which runs as a different user. If the Ice download fails, the installer uses the Adwaita cursor and keeps going. If the Classic download fails, light mode keeps the dark cursor.
 
 The cursor is applied to Hyprland, GTK, X11 apps, Qt and the login screen (Ice).
 
 The cursor follows the Noctalia theme mode. `~/.config/noctalia/hooks.toml` runs `~/.config/noctalia/hooks/cursor-sync.sh` when Noctalia starts and whenever the mode changes. The script sets `gsettings` (open GTK apps change at once), `hyprctl setcursor` and `XCURSOR_THEME` in the systemd user environment (apps started later). Qt apps that are already open keep the old cursor until restarted. No Noctalia reload is needed.
 
 The folders are not owned by any package. If a package ever ships the same folders, remove them first: `sudo rm -rf /usr/share/icons/Bibata-Modern-Ice /usr/share/icons/Bibata-Modern-Classic`.
+
+### Icons
+
+[MoreWaita](https://github.com/somepaulo/MoreWaita) (always the latest release, no checksum) is downloaded and installed to `/usr/share/icons/MoreWaita`, like the cursors. It adds icons for many apps and inherits from Adwaita, so it is only installed when `adwaita-icon-theme` is present. It becomes the icon theme of GTK 3 and GTK 4 apps. Qt keeps `breeze-dark`. If the download fails, the Adwaita icons stay. A folder that already exists is kept; to update, remove `/usr/share/icons/MoreWaita` and run the installer again.
 
 ### Services
 
@@ -92,7 +96,7 @@ Files are copied to `~/.config`. The installer fills in the keyboard layout (rea
 - `~/.config/mimeapps.list`: Brave, Nautilus, Loupe, Showtime, Decibels, Papers and GNOME Text Editor. Entries for apps that are not installed are left out.
 - `/etc/greetd/config.toml` and `/var/lib/noctalia-greeter/greeter.toml` for the login screen.
 
-Dark mode is on, with `adw-gtk3-dark` and the Adwaita icons for GTK apps, and the Breeze Dark icons for Qt and KDE-framework apps (`breeze-icons`).
+Dark mode is on, with `adw-gtk3-dark` and the MoreWaita icons (on top of Adwaita) for GTK apps, and the Breeze Dark icons for Qt and KDE-framework apps (`breeze-icons`).
 
 ### Theme templates
 
@@ -179,7 +183,7 @@ The uninstaller asks before each step:
 1. Disables the Noctalia Greeter: `greetd` and the passwordless login screen sync, and removes `greeter.toml`.
 2. Moves the config files written by the installer to `~/.config-removed-YYYYMMDD-HHMMSS/`. Nothing is deleted. Files you added yourself in the same folders stay where they are.
 3. Restores your old files from the oldest `~/.config-backup-*` folder, which holds the files from before the first install.
-4. Removes the Bibata cursor themes.
+4. Removes the Bibata cursor themes and the MoreWaita icon theme.
 
 Packages, wallpapers and `~/.local/state/noctalia` are not touched. Remove packages by hand with `sudo pacman -Rns <package>`. If the installer disabled another display manager, enable it again with `sudo systemctl enable <name>.service`.
 

@@ -39,6 +39,7 @@ OPTIONAL_PKGS=(
   nwg-look
   adw-gtk-theme
   adwaita-icon-theme
+  adwaita-icon-theme-legacy
   breeze-icons
   qt6ct
   qt6-wayland
@@ -72,16 +73,22 @@ OPTIONAL_PKGS=(
 # runs as a different user. /usr/local/share/icons is NOT searched by Xcursor.
 # If the Ice download fails, Adwaita is used. If the Classic download fails,
 # only the dark cursor is available and the light mode keeps it.
-BIBATA_VERSION="v2.0.7"
-BIBATA_BASE_URL="https://github.com/ful1e5/Bibata_Cursor/releases/download/${BIBATA_VERSION}"
+# Always the latest release, with no checksum: the archive is only protected by HTTPS.
+BIBATA_BASE_URL="https://github.com/ful1e5/Bibata_Cursor/releases/latest/download"
 BIBATA_ICE="Bibata-Modern-Ice"
 BIBATA_CLASSIC="Bibata-Modern-Classic"
-BIBATA_ICE_SHA256="a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef" # SHA-256 of the v2.0.7 archive
-BIBATA_CLASSIC_SHA256="7d3495864e5bbef02f5e77de760b2905903b63c71495a78ef6306d19a3b556d8" # SHA-256 of the v2.0.7 archive
 CURSOR_SYSTEM_DIR="${CURSOR_SYSTEM_DIR:-/usr/share/icons}"
-OLD_CURSOR_DIR="${OLD_CURSOR_DIR:-/usr/local/share/icons}" # used by an earlier version of this installer
 CURSOR_THEME="Adwaita"
 CURSOR_PATH="/usr/share/icons"
+
+# Icon theme for GTK apps, from the upstream release (not in the repositories).
+# MoreWaita adds icons for many apps and inherits from Adwaita, so it is only
+# installed when Adwaita is present. Qt keeps breeze-dark. It is the latest
+# release (the tag comes from the /releases/latest redirect), with no checksum.
+# A folder that already exists is kept: remove it to update.
+MOREWAITA_LATEST_URL="https://github.com/somepaulo/MoreWaita/releases/latest"
+MOREWAITA_ARCHIVE_URL="https://github.com/somepaulo/MoreWaita/archive/refs/tags"
+ICON_THEME="Adwaita"
 
 # Chaotic-AUR (third-party repo), from https://github.com/chaotic-aur (docs at aur.chaotic.cx).
 CHAOTIC_KEY="3056513887B78AEB"
@@ -199,10 +206,10 @@ use_bibata_cursor() {
 }
 
 # Download one Bibata variant and install it to $CURSOR_SYSTEM_DIR.
-# Usage: install_bibata_variant <name> <sha256>
+# Usage: install_bibata_variant <name>
 # Returns 0 when the variant is installed, 1 when it is not (a warning is printed).
 install_bibata_variant() {
-  local name="$1" sha="$2" tmp archive url
+  local name="$1" tmp archive url
 
   if [[ -f "$CURSOR_SYSTEM_DIR/$name/cursors/left_ptr" ]]; then
     return 0
@@ -216,16 +223,6 @@ install_bibata_variant() {
     warn "Could not download $name ($url)."
     rm -rf "$tmp"
     return 1
-  fi
-
-  if [[ -n "$sha" ]]; then
-    if ! echo "$sha  $archive" | sha256sum -c --status; then
-      warn "The $name archive does not match the pinned checksum."
-      rm -rf "$tmp"
-      return 1
-    fi
-  else
-    warn "No checksum is pinned for the $name archive, so it is only protected by HTTPS."
   fi
 
   if ! tar -xf "$archive" -C "$tmp" || [[ ! -f "$tmp/$name/cursors/left_ptr" ]]; then
@@ -245,23 +242,73 @@ install_bibata_variant() {
 install_cursor_theme() {
   step "Installing the cursor themes"
 
-  # Remove the copy an earlier version of this installer put in /usr/local/share/icons.
-  if [[ -d "$OLD_CURSOR_DIR/$BIBATA_ICE" && "$OLD_CURSOR_DIR" != "$CURSOR_SYSTEM_DIR" ]]; then
-    sudo rm -rf "${OLD_CURSOR_DIR:?}/$BIBATA_ICE"
-  fi
-
-  if install_bibata_variant "$BIBATA_ICE" "$BIBATA_ICE_SHA256"; then
+  if install_bibata_variant "$BIBATA_ICE"; then
     use_bibata_cursor
   else
     warn "Using the Adwaita cursor."
   fi
 
   # Light mode cursor. Optional: without it the dark cursor stays in light mode.
-  if install_bibata_variant "$BIBATA_CLASSIC" "$BIBATA_CLASSIC_SHA256"; then
+  if install_bibata_variant "$BIBATA_CLASSIC"; then
     ok "Light mode cursor: $BIBATA_CLASSIC"
   else
     warn "Light mode will keep the dark cursor."
   fi
+}
+
+# Print the archive URL of the latest MoreWaita release. Fails when there is none.
+morewaita_archive_url() {
+  local final
+  final="$(curl -fsSL -o /dev/null -w '%{url_effective}' "$MOREWAITA_LATEST_URL")" || return 1
+  [[ "$final" == */releases/tag/* ]] || return 1
+  printf '%s/%s.tar.gz\n' "$MOREWAITA_ARCHIVE_URL" "${final##*/}"
+}
+
+# Download MoreWaita and install it to $CURSOR_SYSTEM_DIR (the same folder as the
+# cursors). Without it, or without Adwaita, the Adwaita icons stay.
+install_icon_theme() {
+  local dest="$CURSOR_SYSTEM_DIR/MoreWaita" tmp cache url
+
+  step "Installing the MoreWaita icon theme"
+
+  if [[ ! -f "$CURSOR_SYSTEM_DIR/Adwaita/index.theme" ]]; then
+    warn "The Adwaita icon theme is missing, which MoreWaita needs. Using the Adwaita icons."
+    return 0
+  fi
+
+  if [[ ! -f "$dest/index.theme" ]]; then
+    tmp="$(mktemp -d)"
+    mkdir "$tmp/MoreWaita"
+    url="$(morewaita_archive_url || true)"
+
+    # Same files as the upstream install.sh copies.
+    if [[ -z "$url" ]] \
+        || ! curl -fsSL "$url" -o "$tmp/morewaita.tar.gz" \
+        || ! tar -xzf "$tmp/morewaita.tar.gz" -C "$tmp/MoreWaita" --strip-components=1 \
+          --exclude='*.build' --exclude='*.sh' --exclude='*.py' --exclude='*.md' \
+          --exclude='.git*' --exclude='_dev' \
+        || [[ ! -f "$tmp/MoreWaita/index.theme" ]]; then
+      warn "Could not download MoreWaita (${url:-$MOREWAITA_LATEST_URL}). Using the Adwaita icons."
+      rm -rf "$tmp"
+      return 0
+    fi
+
+    sudo install -d -m 0755 "$CURSOR_SYSTEM_DIR"
+    sudo cp -a --no-preserve=ownership "$tmp/MoreWaita" "$CURSOR_SYSTEM_DIR/"
+    sudo chmod -R u=rwX,go=rX "$dest"
+    rm -rf "$tmp"
+  fi
+
+  # The cache is optional: GTK works without it, only slower.
+  for cache in gtk4-update-icon-cache gtk-update-icon-cache; do
+    if command -v "$cache" >/dev/null 2>&1; then
+      sudo "$cache" -f -t "$dest" || warn "Could not update the MoreWaita icon cache."
+      break
+    fi
+  done
+
+  ICON_THEME="MoreWaita"
+  ok "Icon theme: $ICON_THEME"
 }
 
 # Optional. On failure it warns and the install goes on without the repo.
@@ -332,5 +379,6 @@ install_packages() {
 
   check_hyprland_version
   install_cursor_theme
+  install_icon_theme
   ok "Packages done."
 }

@@ -16,7 +16,7 @@ set -u
 DARK_CURSOR="Bibata-Modern-Ice"
 LIGHT_CURSOR="Bibata-Modern-Classic"
 CURSOR_SIZE=24
-ICON_DIRS=(/usr/share/icons /usr/local/share/icons "$HOME/.icons" "$HOME/.local/share/icons")
+ICON_DIRS=(/usr/share/icons "$HOME/.icons" "$HOME/.local/share/icons")
 
 normalize_mode() {
   local value="${1,,}"
