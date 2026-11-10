@@ -111,11 +111,11 @@ ask_options() {
   if ask_yes_no "Install network share (SMB) support for Nautilus?" n; then
     INSTALL_SMB=1
   fi
-  if ask_yes_no "Download the Minimalistic wallpaper pack to ~/Pictures/Wallpapers/Minimalistic?" n; then
-    INSTALL_WALLPAPERS_MINIMALISTIC=1
-  fi
   if ask_yes_no "Download the DT (Derek Taylor) wallpaper pack to ~/Pictures/Wallpapers/DT?" y; then
     INSTALL_WALLPAPERS_DT=1
+  fi
+  if ask_yes_no "Download the Minimalistic wallpaper pack to ~/Pictures/Wallpapers/Minimalistic?" n; then
+    INSTALL_WALLPAPERS_MINIMALISTIC=1
   fi
 
   info "Syncing the login screen runs a fixed helper as root. A polkit rule can allow it for your user without a password."
