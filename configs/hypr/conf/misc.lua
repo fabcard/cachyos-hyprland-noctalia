@@ -24,6 +24,7 @@ hl.config({
   },
   render = {
     direct_scanout = 2, -- only for games
+    cm_auto_hdr = 0,
     -- Use the option below if games black screen for a couple of seconds
     -- whenever direct scanout turns on or off:
     -- non_shader_cm = 0,
