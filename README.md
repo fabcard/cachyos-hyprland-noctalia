@@ -36,8 +36,8 @@ bash install.sh
 2. Asks six questions, then runs without interruptions:
    - Install Bluetooth packages and enable the service? (default: no)
    - Install network share (SMB) support for Nautilus? (default: no)
-   - Download the Minimalistic wallpaper pack to `~/Pictures/Wallpapers/Minimalistic`? (default: no)
    - Download the DT wallpaper pack to `~/Pictures/Wallpapers/DT`? (default: yes)
+   - Download the Minimalistic wallpaper pack to `~/Pictures/Wallpapers/Minimalistic`? (default: no)
    - Sync wallpaper and colors to the login screen without a password prompt? (default: yes)
    - Add the Chaotic-AUR repository? (default: yes)
 3. Runs a full system update (`pacman -Syu`), installs the packages and downloads the cursor theme.
